@@ -1,0 +1,108 @@
+[comment encoding = UTF-8 /]
+[module generateSolidity('http://www.example.org/ethereumSolidity')]
+
+
+[template public generateSmartContract(sc : SmartContract)]
+[comment @main/]
+[file (sc.FileName.concat('.sol'), false, 'UTF-8')]
+
+//SPDX-License-Identifier: MIT
+pragma solidity [sc.PragmaSolidity/]
+
+contract [sc.SCName/]{
+
+	[for (k: GVariable| sc.gvariables)]
+		[generateGlobalVariables(k)/]
+	[/for]
+	
+	[for (i : GlobalFunction | sc.globalfunctions)]
+		[generateFunctions(i)/]
+	[/for]
+
+[/file]
+[/template]
+
+[template public generateGlobalVariables(gv : GVariable)]
+[gv.primitivets.PType/] [gv.VisGV/] [gv.NamePPal/]; 
+[/template]
+
+[template public generateFunctions(gf : GlobalFunction)]
+function [gf.NameF/]([for(j:FunctionParameter | gf.functionparameters) separator(', ')][if(j.PType.toString()='string')][j.PType/] memory [j.NameFP/][/if][if(j.PType.toString()='int')][j.PType/] [j.NameFP/][/if][/for]) [gf.VisGF/] [gf.TypeFunction/]{ 
+	// [gf.Instructions/];
+	return [gf.returns.NameR/];
+}
+[/template]
+
+[for (m : Mapping| sc.mappings)]
+	[generateMappings(m)/]
+[/for]
+
+[for (k: Event| sc.events)]
+	[generateEvents(k)/]
+[/for]
+
+[for (k: Struct| sc.structs)]
+	[generateStructs(k)/]
+[/for]
+
+[for (k: Struct| sc.structs)]
+	[instantiateStructs(k)/]
+[/for]
+
+[for (i : GlobalFunction | sc.globalfunctions)]
+	[generateFunctions(i)/]
+[/for]
+[GenEvents(sc)/]
+
+}
+
+[/file]
+[/template]
+
+[template public generateGlobalVariables(gv : GVariable)]
+[gv.primitivets.PType/] [gv.VisGV/] [gv.NamePPal/]; 
+[/template]
+
+[template public generateMappings (gm: Mapping)]
+mapping([gm.A1/] => [gm.A2/]) [gm.VisM/] [gm.NameM/];	
+[/template]
+
+[template public generateEvents(e : Event)]
+event [e.NameE/]([for(j : EventMember| e.eventmembers)][j.TypeE/] [j.type.NamePPal/][/for]);
+[/template]
+
+[template public generateStructs(st : Struct)]
+struct [st.NameS/] {
+[for (j : StructMember| st.structmembers)]
+	[j.TypeSM/] [j.type.NamePPal/]; 
+[/for]}
+[/template]
+
+[template public instantiateStructs(st : Struct)]
+[for (j : InstanceStruct| st.instancestructs)][st.NameS/] ['[]'/] [st.instancestructs.VisIS/] [st.instancestructs.NameIS/];[/for]
+[/template]
+
+[template public generateFunctions(gf : GlobalFunction)]
+function [gf.NameF/]([for(j:FunctionParameter | gf.functionparameters) separator(', ')][if(j.PType.toString()='string')][j.PType/] memory [j.NameFP/][/if][if(j.PType.toString()='int')][j.PType/] [j.NameFP/][/if][/for]) [gf.VisGF/] [gf.TypeFunction/]{ 
+	// [gf.Instructions/];
+	return [gf.returns.NameR/];
+}
+[/template]
+
+[template public GenEvents(sc1 : SmartContract)]
+[for (gv : GVariable | sc1.gvariables)]
+	[for (b : Event| sc1.events)]
+	function ['set'.concat(gv.NamePPal.toUpperFirst())/]([if(gv.primitivets.PType.toString()='string')][gv.primitivets.PType/] memory ['_'.concat(gv.NamePPal)/][/if][if(gv.primitivets.PType.toString()='int')][gv.primitivets.PType/] ['_'.concat(gv.NamePPal)/][/if]) [gv.VisGV/]{
+		[gv.NamePPal/] = ['_'.concat(gv.NamePPal)/];
+		//instrucciones
+		//se emite una llamada al  evento 
+		emit [b.NameE/]("[gv.NamePPal/]");
+	}
+
+	function ['get'.concat(gv.NamePPal.toUpperFirst())/]() [gv.VisGV/] view returns ([if(gv.primitivets.PType.toString()='string')][gv.primitivets.PType/] memory [/if]) {
+		return [gv.NamePPal/]; 
+	}
+
+	[/for]
+[/for]
+[/template]

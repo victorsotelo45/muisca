@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel"
+    modelDirectory="/HyperledgerGo/src-gen" creationIcons="false" editDirectory="/HyperledgerGo.edit/src-gen"
+    editorDirectory="/HyperledgerGo.editor/src-gen" modelPluginID="HyperledgerGo"
+    modelName="HyperledgerGo" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    codeFormatting="true" importerID="org.eclipse.emf.importer.ecore" complianceLevel="17.0"
+    copyrightFields="false" operationReflection="true" importOrganizing="true">
+  <foreignModel>hyperledgerGo.ecore</foreignModel>
+  <testsDirectory xsi:nil="true"/>
+  <genPackages prefix="HyperledgerGo" disposableProviderFactory="true" ecorePackage="hyperledgerGo.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="hyperledgerGo.ecore#//TypeVariable">
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/string"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/int"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/float64"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/bool"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/byte"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/contractapi.TransactionContextInterface"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/rune"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/int64"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/float32"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/[]int"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerGo.ecore#//TypeVariable/[]string"/>
+    </genEnums>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//SmartContract">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//SmartContract/SCName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//SmartContract/FileName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//SmartContract/packages"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//SmartContract/imports"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//SmartContract/structs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//SmartContract/functions"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//Variable">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//Variable/Name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//Variable/Type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//Variable/Description"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//Function">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//Function/ReturnType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//Function/Instructions"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//Function/parameters"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//Function/localvariables"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//Function/typefunctions"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//Import"/>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//Package"/>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//Struct">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//Struct/variables"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//Tag">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//Tag/Name"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//Parameter"/>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//ContractElement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//ContractElement/Name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//ContractElement/Description"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//VariableStruct">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//VariableStruct/IsAnonym"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerGo.ecore#//VariableStruct/tags"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//LocalVariable"/>
+    <genClasses ecoreClass="hyperledgerGo.ecore#//TypeFunction">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//TypeFunction/VarName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerGo.ecore#//TypeFunction/StructName"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

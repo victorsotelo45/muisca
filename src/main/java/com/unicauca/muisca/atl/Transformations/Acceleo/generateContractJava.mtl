@@ -1,0 +1,204 @@
+[comment encoding = UTF-8 /]
+[module generateContractJava('http://www.example.org/hyperledgerJava')]
+
+
+[template public generateSmartContract(sc1 : SmartContract)]
+[comment @main/]
+[file (sc1.SCName.concat('.java'), false, 'UTF-8')]
+package [sc1.packages.Name/];
+
+import org.hyperledger.fabric.contract.Context;
+import org.hyperledger.fabric.contract.ContractInterface;
+import org.hyperledger.fabric.contract.annotation.Contract;
+import org.hyperledger.fabric.contract.annotation.Default;
+import org.hyperledger.fabric.contract.annotation.Transaction;
+
+import org.hyperledger.fabric.contract.annotation.Contact;
+import org.hyperledger.fabric.contract.annotation.Info;
+import org.hyperledger.fabric.contract.annotation.License;
+import static java.nio.charset.StandardCharsets.UTF_8;
+[for (i: Import | sc1.imports)]
+[generarImports(i)/]
+[/for]
+	
+@Contract(name = "[sc1.contracts.Name/]",
+	info = @Info(title = "[sc1.contracts.informations.Title/]",
+				description = "[sc1.contracts.informations.Description/]",
+				version = "[sc1.contracts.informations.Version/]",
+				license = 
+						@License(name = "[sc1.contracts.informations.licenses.Name/]",
+								url = "[sc1.contracts.informations.licenses.UrlLicense/]"),
+								contact = @Contact(email = "[sc1.contracts.informations.contacts.Email/]",
+											name = "[sc1.contracts.informations.contacts.Name/]",
+											url = "[sc1.contracts.informations.contacts.UrlContact/]")))
+
+@Default
+public class [sc1.SCName/] implements ContractInterface {
+
+	public [sc1.SCName/]() {
+	}
+	
+	[for (t: Transaction | sc1.transactions)]	
+	[generarTransaction(t, sc1)/]
+
+	[/for]
+
+}
+[/file]
+[/template]
+
+[template public generarTransaction(gt : Transaction, sc : SmartContract) ? (IsVoid <> true)]
+[if (gt.Name.toLowerCase().contains('create') or gt.Name.toLowerCase().contains('update') or gt.Name.toLowerCase().contains('delete'))]
+@Transaction(intent = Transaction.TYPE.SUBMIT)
+[elseif (gt.Name.toLowerCase().contains('query') or gt.Name.toLowerCase().contains('read') or gt.Name.toLowerCase().contains('exist'))]
+@Transaction(intent = Transaction.TYPE.EVALUATE)
+[/if]
+[if (gt.ObjectReturn.size() > 0)]
+[gt.Visibility/] [gt.ObjectReturn/] [gt.Name/]([for (p: Parameter | gt.parameters) separator(', ')][generarParameter(p)/][/for]){
+[else]
+[gt.Visibility/] [gt.TypeFunc/] [gt.Name/]([for (p: Parameter | gt.parameters) separator(', ')][generarParameter(p)/][/for]){
+[/if][if (not gt.Instructions.oclIsUndefined())][gt.Instructions/][/if]	
+[if (gt.Name.toLowerCase().contains('exists'))]
+	byte ['[]'/] buffer = ctx.getStub().getState([generarID(gt)/]);	
+	return (buffer != null && buffer.length > 0);
+[elseif (gt.Name.toLowerCase().contains('query'))]
+	boolean exists = [replaceQuery(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (!exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" does not exist");
+	}
+	[replaceQuery(gt).toUpperFirst()/] asset = [replaceQuery(gt).toUpperFirst()/].fromJSONString(new String(ctx.getStub().getState([generarID(gt)/]),UTF_8));
+	return [gt.Return/];
+[elseif (gt.Name.toLowerCase().contains('read'))]
+	boolean exists = [replaceRead(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (!exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" does not exist");
+	}
+	[replaceRead(gt).toUpperFirst()/] asset = [replaceRead(gt).toUpperFirst()/].fromJSONString(new String(ctx.getStub().getState([generarID(gt)/]),UTF_8));
+	return [gt.Return/];
+[elseif (gt.Name.toLowerCase().contains('update'))]
+	boolean exists = [replaceUpdate(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (!exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" does not exist");
+	}
+	[replaceUpdate(gt).toUpperFirst()/] asset = new [replaceUpdate(gt).toUpperFirst()/]();
+	[generarSetter(sc.assets)/]
+	ctx.getStub().putState([generarID(gt)/], asset.toJSONString().getBytes(UTF_8));
+	return [gt.Return/];
+[elseif (gt.Name.toLowerCase().contains('delete'))]
+	boolean exists = [replaceDelete(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (!exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" does not exist");
+	}
+	[replaceDelete(gt).toUpperFirst()/] asset = new [replaceDelete(gt).toUpperFirst()/]();
+	[generarSetter(sc.assets)/]
+	ctx.getStub().delState([generarID(gt)/]);
+	return [gt.Return/];
+[elseif (gt.Name.toLowerCase().contains('create'))]
+	boolean exists = [replaceCreate(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" already exists");
+	}
+	[replaceCreate(gt).toUpperFirst()/] asset = new [replaceCreate(gt).toUpperFirst()/]();
+	[generarSetter(sc.assets)/]
+	ctx.getStub().putState([generarID(gt)/], asset.toJSONString().getBytes(UTF_8));
+	return [gt.Return/];	
+[/if]
+}
+[/template]
+
+[template public generarTransaction(gt : Transaction, sc : SmartContract) ? (IsVoid <> false)]
+[if (gt.Name.toLowerCase().contains('create') or gt.Name.toLowerCase().contains('update') or gt.Name.toLowerCase().contains('delete'))]
+@Transaction(intent = Transaction.TYPE.SUBMIT)
+[elseif (gt.Name.toLowerCase().contains('query') or gt.Name.toLowerCase().contains('read') or gt.Name.toLowerCase().contains('exist'))]
+@Transaction(intent = Transaction.TYPE.EVALUATE)
+[/if]
+[gt.Visibility/] void [gt.Name/]([for (p: Parameter | gt.parameters) separator(', ')][generarParameter(p)/][/for]){
+[if (not gt.Instructions.oclIsUndefined())][gt.Instructions/][/if]	
+[if (gt.Name.toLowerCase().contains('update'))]
+	boolean exists = [replaceUpdate(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (!exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" does not exist");
+	}
+	byte ['[]'/] [replaceUpdate(gt).toLower()/]Bytes = ctx.getStub().getState([generarID(gt)/]);
+	if ([replaceUpdate(gt).toLower()/]Bytes == null || [replaceUpdate(gt).toLower()/]Bytes.length == 0){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" does not exist");
+	}
+	
+	[replaceUpdate(gt).toUpperFirst()/] [replaceUpdate(gt).toLower()/] = [replaceUpdate(gt).toLower()/].fromJSONString(new String([replaceUpdate(gt).toLower()/]Bytes, UTF_8));    	
+	[generarSetterUpdate(sc.assets)/]
+	ctx.getStub().putState([generarID(gt)/], [replaceUpdate(gt).toLower()/].toJSONString().getBytes(UTF_8));
+[elseif (gt.Name.toLowerCase().contains('delete'))]
+	boolean exists = [replaceDelete(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (!exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" does not exist");
+	}
+	[replaceDelete(gt).toUpperFirst()/] asset = new [replaceDelete(gt).toUpperFirst()/]();
+	[generarSetter(sc.assets)/]
+	ctx.getStub().delState([generarID(gt)/]);
+[elseif (gt.Name.toLowerCase().contains('create'))]
+	boolean exists = [replaceCreate(gt)/]Exists(ctx,[generarID(gt)/]);
+	if (exists){
+		throw new RuntimeException("The asset "+[generarID(gt)/]+" already exists");
+	}
+	[replaceCreate(gt).toUpperFirst()/] asset = new [replaceCreate(gt).toUpperFirst()/]();
+	[generarSetter(sc.assets)/]
+	ctx.getStub().putState([generarID(gt)/], asset.toJSONString().getBytes(UTF_8));
+[/if]
+}
+[/template]
+
+[template public generarSetter(gt : Transaction, a : Asset)]
+[for (p: Parameter | gt.parameters)][if (p.Name.equalsIgnoreCase('ctx'))]
+[else]
+[asignarValor(a, p)/]
+[/if]
+[/for]
+[/template]
+
+[template public generarSetterUpdate(gt : Transaction, a : Asset)]
+[for (p: Parameter | gt.parameters)][if (p.Name.equalsIgnoreCase('ctx') or p.Name.equalsIgnoreCase('id'))]
+[else]
+[replaceUpdate(gt).toLowerFirst()/][asignarValorUpdate(a, p)/]
+[/if]
+[/for]
+[/template]
+
+[template public asignarValor(gs : Asset, par: Parameter)]
+[for (p: Property | gs.properties)][if (par.Name.toLower().contains('typeid') and p.Name.toLower().contains('typeid'))]asset.set[p.Name.toUpperFirst()/]([par.Name/]);[/if][/for][for (p: Property | gs.properties)][if not (par.Name.toLower().contains('typeid'))][if (par.Name.toLower().contains(p.Name.toLower()))]asset.set[p.Name.toUpperFirst()/]([par.Name/]);[else][/if][/if][/for]
+[/template]
+
+[template public asignarValorUpdate(gs : Asset, par: Parameter)]
+[for (p: Property | gs.properties)][if (par.Name.toLower().contains('typeid') and p.Name.toLower().contains('typeid'))]asset.set[p.Name.toUpperFirst()/]([par.Name/]);[/if][/for][for (p: Property | gs.properties)][if not (par.Name.toLower().contains('typeid'))][if (par.Name.toLower().contains(p.Name.toLower()))].set[p.Name.toUpperFirst()/]([par.Name/]);[else][/if][/if][/for]
+[/template]
+
+[template public generarParameter(gp : Parameter)]
+[gp.TypeVar/] [gp.Name/]
+[/template]
+
+[template public generarImports(gi : Import)]
+import [gi.Name/];
+[/template]
+
+[template public generarID(t : Transaction)]
+[for (p: Parameter | t.parameters)][if (p.Name.toLower().contains('id'))][if not (p.Name.toLower().contains('type'))][p.Name/][/if][/if][/for]
+[/template]
+
+[template public replaceCreate(t : Transaction)]
+[t.Name.toLowerFirst().replace('create', '')/]
+[/template]
+
+[template public replaceDelete(t : Transaction)]
+[t.Name.toLowerFirst().replace('delete', '')/]
+[/template]
+
+[template public replaceUpdate(t : Transaction)]
+[t.Name.toLowerFirst().replace('update', '')/]
+[/template]
+
+[template public replaceRead(t : Transaction)]
+[t.Name.toLowerFirst().replace('read', '')/]
+[/template]
+
+[template public replaceQuery(t : Transaction)]
+[t.Name.toLowerFirst().replace('query', '')/]
+[/template]

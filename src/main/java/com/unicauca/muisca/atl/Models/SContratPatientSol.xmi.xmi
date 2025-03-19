@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ethereumSolidity:SmartContract
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ethereumSolidity="http://www.example.org/ethereumSolidity"
+    xsi:schemaLocation="http://www.example.org/ethereumSolidity ethereumSolidity.ecore"
+    SCName="SContractPatientSol"
+    FileName="SContractPatientSol"
+    PragmaSolidity=">=0.8.4;">
+  <primitivetypes
+      NamePPal="idPatient"/>
+  <primitivetypes
+      NamePPal="namePatient"/>
+  <primitivetypes
+      NamePPal="agePatient"/>
+  <events NameE="updatePatient"/>
+  <assets NameA="medicalHistory"/>
+  <users NameU="Patient"/>
+  <structs NameS="Pacientes">
+    <structmembers
+        type="//@primitivetypes.0"/>
+    <structmembers
+        type="//@primitivetypes.1"/>
+    <structmembers
+        TypeSM="int"
+        type="//@primitivetypes.2"/>
+  </structs>
+  <globalfunctions
+      NameF="createPatient">
+    <functionparameters
+        NameFP="idPatient"
+        type="//@primitivetypes.0"/>
+    <functionparameters
+        NameFP="namePatient"
+        type="//@primitivetypes.1"/>
+    <functionparameters
+        NameFP="agePatient"
+        PType="int"
+        type="//@primitivetypes.2"/>
+  </globalfunctions>
+  <globalfunctions
+      NameF="readPatient">
+    <functionparameters
+        NameFP="idPatient"
+        type="//@primitivetypes.0"/>
+    <returns
+        NameR="idPatient"
+        type="//@primitivetypes.0"/>
+  </globalfunctions>
+  <globalfunctions
+      NameF="updatePatient">
+    <functionparameters
+        NameFP="idPatient"
+        type="//@primitivetypes.0"/>
+    <functionparameters
+        NameFP="namePatient"
+        type="//@primitivetypes.1"/>
+    <functionparameters
+        NameFP="agePatient"
+        type="//@primitivetypes.2"/>
+  </globalfunctions>
+</ethereumSolidity:SmartContract>

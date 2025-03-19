@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel"
+    modelDirectory="/HyperledgerJava/src-gen" creationIcons="false"
+    editDirectory="/HyperledgerJava.edit/src-gen" editorDirectory="/HyperledgerJava.editor/src-gen"
+    modelPluginID="HyperledgerJava" modelName="HyperledgerJava" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    codeFormatting="true" importerID="org.eclipse.emf.importer.ecore" complianceLevel="17.0"
+    copyrightFields="false" operationReflection="true" importOrganizing="true">
+  <foreignModel>hyperledgerJava.ecore</foreignModel>
+  <testsDirectory xsi:nil="true"/>
+  <genPackages prefix="HyperledgerJava" disposableProviderFactory="true" ecorePackage="hyperledgerJava.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="hyperledgerJava.ecore#//TypeVisibility">
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVisibility/public"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVisibility/private"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVisibility/protected"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="hyperledgerJava.ecore#//TypeVariable">
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/String"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/double"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/int"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/float"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/boolean"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/int[]"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/String[]"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/enum"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/Context"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/byte"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/char"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeVariable/long"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="hyperledgerJava.ecore#//TypeFunction">
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeFunction/String"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeFunction/Double"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeFunction/void"/>
+      <genEnumLiterals ecoreEnumLiteral="hyperledgerJava.ecore#//TypeFunction/boolean"/>
+    </genEnums>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//SmartContract">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//SmartContract/SCName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//SmartContract/imports"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//SmartContract/packages"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//SmartContract/contracts"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//SmartContract/transactions"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//SmartContract/assets"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Package"/>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Contract">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//Contract/informations"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Import"/>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//License">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//License/Name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//License/UrlLicense"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Contact">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Contact/Email"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Contact/Name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Contact/UrlContact"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Information">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Information/Title"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Information/Description"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Information/Version"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//Information/contacts"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//Information/licenses"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Transaction">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Transaction/Visibility"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Transaction/Instructions"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Transaction/TypeFunc"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Transaction/IsVoid"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Transaction/Return"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//Transaction/parameters"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Transaction/ObjectReturn"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Parameter"/>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//ContractElement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//ContractElement/Name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//ContractElement/Description"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Asset">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Asset/Name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//Asset/properties"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//Asset/packages"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference hyperledgerJava.ecore#//Asset/imports"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Property">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Property/Visibility"/>
+    </genClasses>
+    <genClasses ecoreClass="hyperledgerJava.ecore#//Variable">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Variable/Name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute hyperledgerJava.ecore#//Variable/TypeVar"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

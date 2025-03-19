@@ -1,0 +1,229 @@
+module IContract2Solidity;
+
+-- Metamodelos utilizados en la transformación
+-- @path Solidity= /IContract_Solidity/ethereumSolidity.ecore
+-- @path IContract= /IContract_Solidity/sclang.ecore
+
+-- Creación de los metamodelos de salida y entrada
+create OUT: Solidity from IN: IContract;
+
+-- ***********************
+-- HELPER FUNCTIONS
+-- ***********************
+
+-- Helper que obtiene todas las funciones (transacciones) del contrato.
+helper context IContract!SContract def : getAllFunctions() : Sequence(IContract!Element) =
+    IContract!Element.allInstances()
+    ->select(p | p.oclIsTypeOf(IContract!Transaction))
+    ->asSet();
+
+-- Helper que obtiene todas las estructuras (Assets) definidas en el contrato.
+helper context IContract!SContract def : getAllStructs() : Sequence(IContract!Element) =
+    IContract!Element.allInstances()
+    ->select(p | p.oclIsTypeOf(IContract!Asset))
+    ->asSet();
+
+-- Helper que obtiene todos los eventos asociados a una transacción.
+helper context IContract!Transaction def : getEvents() : Sequence(IContract!Events) =
+    self.oclAsType(Element!Relationship)
+    ->select(r | r.oclIsTypeOf(IContract!TranRel))
+    ->collect(tr | tr.oclAsType(IContract!TranRel).events)
+    ->flatten()
+    ->asSet();
+
+-- Helper que obtiene todos los eventos del contrato.
+helper context IContract!SContract def : getAllEvents() : Sequence(IContract!Events) =
+    IContract!Element.allInstances()
+    ->select(e | e.oclIsTypeOf(IContract!Transaction))
+    ->select(r | r.oclIsTypeOf(IContract!TranRel))
+    ->collect(tr | tr.oclAsType(IContract!TranRel).events)
+    ->flatten()
+    ->asSet();
+
+-- Helper que obtiene todos los parámetros definidos en el contrato.
+helper context IContract!SContract def : getAllParameters() : Sequence(IContract!Parameter) =
+    IContract!Element.allInstances()
+    ->select(p | p.oclIsTypeOf(IContract!Parameter))
+    ->asSet();
+
+-- Helper que obtiene todos los parámetros asociados a una transacción.
+helper context IContract!Transaction def : getAllParameterTransaction() : Sequence(IContract!Parameter) =
+    self.element->asSequence();
+
+-- Helper que obtiene el participante principal del contrato.
+helper context IContract!SContract def : getParticipant() : IContract!Element =
+    IContract!Element.allInstances()
+    ->select(p | p.oclIsTypeOf(IContract!Participant));
+
+-- Helper que obtiene el activo principal del contrato.
+helper context IContract!SContract def : getAsset() : IContract!Element =
+    IContract!Element.allInstances()
+    ->select(p | p.oclIsTypeOf(IContract!Asset));
+
+-- Helper que define un tipo de dato por defecto como 'string'.
+helper def : type : String = 'string';
+
+-- Helper que transforma el tipo de un parámetro a un tipo válido en Solidity.
+helper def : typeVar(F: IContract!Parameter) : String =
+    if (F.type.toString().endsWith('ing')) then
+        'string'
+    else if (F.type.toString().startsWith('int[') or F.type.toString().startsWith('String[')) then
+        'array'
+    else if (F.type.toString().startsWith('int')) then
+        'int'
+    else if (F.type.toString().endsWith('boo')) then
+        'bool'
+    else
+        'money'
+    endif
+    endif
+    endif
+    endif;
+
+-- Helper que define una versión de pragma Solidity personalizada.
+helper def : customPragmaSolidity : String = '^0.8.4';
+
+-- Helper que obtiene todos los tipos primitivos definidos en Solidity.
+helper def : getPrimitiveTypes() : Sequence(Solidity!PrimitiveType) =
+    Solidity!PrimitiveType.allInstances();
+
+-- Helper que encuentra el tipo primitivo de Solidity correspondiente a un parámetro.
+helper def : getPrimitiveTypeForParam(p : IContract!Parameter) : Solidity!PrimitiveType =
+    Solidity!PrimitiveType.allInstances()
+    ->select(pt | pt.NamePPal = p.name)
+    ->first();
+
+-- ***********************
+-- TRANSFORMATION RULES
+-- ***********************
+
+-- Regla principal: transforma un contrato de entrada en un contrato de Solidity.
+rule IContract2SmartContract {
+    from
+        s: IContract!SContract
+    to
+        t: Solidity!SmartContract (
+            SCName <- s.scName,
+            FileName <- s.scName,
+            PragmaSolidity <- thisModule.customPragmaSolidity,
+            assets <- s.getAsset(),
+            users <- s.getParticipant(),
+            events <- s.getAllEvents(),
+            globalfunctions <- s.getAllFunctions(),
+            primitivetypes <- s.getAllParameters(),
+            constructors <- s.getParticipant(),
+            structs <- s.getParticipant() -> collect(p | thisModule.Participant2Struct(p))
+        )
+}
+
+-- Regla que transforma un Asset en una estructura de Solidity.
+rule Asset2Asset {
+    from
+        s: IContract!Asset
+    to
+        t: Solidity!Asset (
+            NameA <- s.name
+        )
+}
+
+-- Regla que transforma un participante en un usuario de Solidity.
+rule Participant2User {
+    from
+        s: IContract!Participant
+    to
+        t: Solidity!User (
+            NameU <- s.name,
+            TUser <- 'owner'
+        )
+}
+
+-- Regla que transforma un parámetro en un tipo primitivo de Solidity.
+rule Parameter2PrimitiveType {
+    from
+        p: IContract!Parameter (
+            IContract!Parameter.allInstances()
+            ->select(other | other.name = p.name)
+            ->first() = p
+        )
+    to
+        t: Solidity!PrimitiveType (
+            NamePPal <- p.name,
+            PType <- thisModule.typeVar(p)
+        )
+}
+
+-- Regla que crea un valor de retorno para una función de Solidity.
+lazy rule createReturn {
+    from
+        s: IContract!FunctionParameter
+    to
+        t: Solidity!Return (
+            NameR <- s.name,
+            type <- thisModule.getPrimitiveTypeForParam(s)
+        )
+}
+
+-- Regla que transforma una transacción en una función global de Solidity.
+rule Transaction2GlobalFunction {
+    from
+        s: IContract!Transaction
+    to
+        t: Solidity!GlobalFunction (
+            Instructions <- '',
+            NameF <- s.name,
+            TypeFunction <- if s.name.toString().startsWith('query') or s.name.toString().startsWith('read') then 'view' else 'payable' endif,
+            functionparameters <- s.getAllParameterTransaction() -> collect(p | thisModule.Parameter2FunctionParameter(p)),
+            returns <-
+                if s.name.toString().startsWith('query') or s.name.toString().startsWith('read') then
+                    s.getAllParameterTransaction() -> collect(p | thisModule.createReturn(p))
+                else
+                    Sequence {}
+                endif
+        )
+}
+
+-- Regla perezosa que transforma un parámetro en un parámetro de función.
+lazy rule Parameter2FunctionParameter {
+    from
+        p: IContract!Parameter
+    to
+        t: Solidity!FunctionParameter (
+            NameFP <- p.name,
+            PType <- thisModule.typeVar(p),
+            VisFP <- 'public',
+            type <- thisModule.getPrimitiveTypeForParam(p)
+        )
+}
+
+-- Regla perezosa que transforma un participante en una estructura de Solidity.
+lazy rule Participant2Struct {
+    from
+        p: IContract!Participant
+    to
+        t: Solidity!Struct (
+            NameS <- p.name,
+            structmembers <- thisModule.getPrimitiveTypes() -> collect(pt | thisModule.PrimitiveType2StructMember(pt))
+        )
+}
+
+-- Regla perezosa que transforma un tipo primitivo en un miembro de estructura de Solidity.
+lazy rule PrimitiveType2StructMember {
+    from
+        p: Solidity!PrimitiveType
+    to
+        t: Solidity!StructMember (
+            type <- p,
+            TypeSM <- p.PType,
+            VisSM <- 'public'
+        )
+}
+
+-- Regla perezosa que transforma un evento en un evento de Solidity.
+lazy rule Events2SolidityEvent {
+    from
+        e: IContract!Events
+    to
+        se: Solidity!Event (
+            NameE <- e.name
+        )
+}

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel"
+    modelDirectory="/EthereumSolidity/src-gen" creationIcons="false"
+    editDirectory="/EthereumSolidity.edit/src-gen" editorDirectory="/EthereumSolidity.editor/src-gen"
+    modelPluginID="EthereumSolidity" modelName="EthereumSolidity" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    codeFormatting="true" importerID="org.eclipse.emf.importer.ecore" complianceLevel="17.0"
+    copyrightFields="false" operationReflection="true" importOrganizing="true">
+  <foreignModel>ethereumSolidity.ecore</foreignModel>
+  <testsDirectory xsi:nil="true"/>
+  <genPackages prefix="EthereumSolidity" disposableProviderFactory="true" ecorePackage="ethereumSolidity.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="ethereumSolidity.ecore#//PType">
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/string"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/address"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/int"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/bool"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/dooble"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/datetime"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/array"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/money"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//PType/unit256"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="ethereumSolidity.ecore#//VisF">
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//VisF/public"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//VisF/private"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//VisF/internal"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//VisF/external"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="ethereumSolidity.ecore#//TUsers">
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//TUsers/owner"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//TUsers/user"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//TUsers/thirdparty"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="ethereumSolidity.ecore#//TypeF">
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//TypeF/payable"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//TypeF/view"/>
+      <genEnumLiterals ecoreEnumLiteral="ethereumSolidity.ecore#//TypeF/pure"/>
+    </genEnums>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//SmartContract">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//SmartContract/SCName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//SmartContract/FileName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//SmartContract/PragmaSolidity"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/primitivetypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/gvariables"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/events"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/assets"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/users"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/mappings"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/structs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/localfunctions"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/globalfunctions"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/localtypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//SmartContract/constructors"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//PrimitiveType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//PrimitiveType/PType"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//GVariable">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//GVariable/VisGV"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//GVariable/primitivets"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//EventMember">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//EventMember/TypeE"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//EventMember/type"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Asset">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Asset/NameA"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//User">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//User/NameU"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//User/TUser"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Mapping">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Mapping/NameM"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Mapping/A1"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Mapping/A2"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Mapping/VisM"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//StructMember">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//StructMember/TypeSM"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//StructMember/VisSM"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//StructMember/type"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//FunctionParameter">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//FunctionParameter/NameFP"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//FunctionParameter/PType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//FunctionParameter/VisFP"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//FunctionParameter/type"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Return">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Return/NameR"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Return/type"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Function">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Function/Instructions"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Function/NameF"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Function/TypeFunction"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Function/functionparameters"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Function/returns"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Struct">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Struct/NameS"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Struct/instancestructs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Struct/structmembers"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//InstanceStruct">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//InstanceStruct/VisIS"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//InstanceStruct/NameIS"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//LocalFunction">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//LocalFunction/VisLF"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//GlobalFunction">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//GlobalFunction/VisGF"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Event">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Event/NameE"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Event/eventmembers"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Type">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Type/NamePPal"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Repository">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Repository/smartcontracts"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Repository/globaltypes"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Repository/NameR"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//Constructor">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//Constructor/Content"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//Constructor/constructorps"/>
+    </genClasses>
+    <genClasses ecoreClass="ethereumSolidity.ecore#//ConstructorP">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ethereumSolidity.ecore#//ConstructorP/NameC"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ethereumSolidity.ecore#//ConstructorP/type"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

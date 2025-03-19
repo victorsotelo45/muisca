@@ -1,0 +1,192 @@
+module IContractML2Go;
+
+-- @path Go= /Go_iContract/go.ecore
+-- @path IContract= /Go_iContract/sclang.ecore
+
+-- Creación de los metamodelos
+create OUT: Go from IN: IContract;
+
+-- Helpers
+-- Helper que extrae todas las transacciones (Transaction) del contrato.
+helper context IContract!SContract def : getAllFunctions () : Sequence(IContract!Element) =
+    IContract!Element.allInstances() ->select(p | p.oclIsTypeOf(IContract!Transaction)) ->asSet();
+
+-- Helper que extrae todos los activos (Asset) del contrato.
+helper context IContract!SContract def : getAllStructs () : Sequence(IContract!Element) =
+    IContract!Element.allInstances() ->select(p | p.oclIsTypeOf(IContract!Asset)) ->asSet();
+
+-- Helper que extrae todos los parámetros asociados a un activo (Asset).
+helper context IContract!Asset def : getAllParameterAsset () : Sequence(IContract!Parameter) =
+    self.element->asSequence();
+
+-- Helper que extrae todos los parámetros asociados a una transacción (Transaction).
+helper context IContract!Transaction def : getAllParameterTransaction () : Sequence(IContract!Parameter) =
+    self.element->asSequence();
+
+-- Helper para definir el tipo de dato por defecto como 'string'.
+helper def : type : String = 'string';
+
+-- Helper que transforma el tipo de un parámetro a un tipo de Go basado en reglas específicas.
+helper def : typeVar(F: IContract!Parameter) : String = 
+    if (F.type.toString().endsWith('ing')) then
+        'string'
+    else if(F.type.toString().startsWith('int[')) then
+        '[]i'
+    else if(F.type.toString().startsWith('String[')) then 
+        '[]s'
+    else if(F.type.toString().startsWith('Context') or F.type.toString().startsWith('contract')) then
+        'contractapi.TransactionContextInterface'
+    else if(F.type.toString().startsWith('int')) then
+        'int'
+    else if(F.type.toString().endsWith('double')) then
+        'float64'
+    else if(F.type.toString().endsWith('float')) then
+        'float32'
+    else if(F.type.toString().endsWith('boo')) then
+        'bool'
+    else 
+        'rune'
+    endif
+    endif
+    endif
+    endif
+    endif
+    endif        
+    endif
+    endif;
+
+-- Helper que define una descripción de importación personalizada.
+helper def : customImportDescription : String = 'Libreria de Hyperledger Fabric';
+
+-- Helper que define el nombre de importación personalizado.
+helper def : customImportName : String = 'github.com/hyperledger/fabric-contract-api-go/contractapi';
+
+-- Reglas de transformación
+
+-- Regla principal que transforma un contrato de entrada en un contrato de Go.
+rule IContract2SmartContract {
+    from
+        s: IContract!SContract
+    to
+        t: Go!SmartContract (
+            SCName <- s.scName,
+            FileName <- s.scName,
+            functions <- s.getAllFunctions(),
+            structs <- s.getAllStructs().including(thisModule.createContract(s)),
+            imports <- thisModule.createImport(s),
+            packages <- thisModule.createPackage(s)
+        )
+}
+
+-- Regla que transforma una transacción en una función de Go.
+rule Transaction2Function {
+    from
+        s: IContract!Transaction
+    to
+        t: Go!Function (
+            Name <- s.name,
+            parameters <- s.getAllParameterTransaction()->collect(p | thisModule.Parameter2TransactionParameter(p)),
+            typefunctions <- thisModule.createTypeFunction(s)
+        )
+}
+
+-- Regla que transforma un activo en una estructura de Go.
+rule Asset2Struct {
+    from
+        s: IContract!Asset
+    to
+        t: Go!Struct (
+            Name <- s.name,
+            variables <- s.getAllParameterAsset()->collect(p | thisModule.Parameter2StructVariable(p))
+        )
+}
+
+-- Regla perezosa (lazy) que transforma un parámetro en una variable de estructura.
+lazy rule Parameter2StructVariable {
+    from
+        p: IContract!Parameter
+    to
+        t: Go!VariableStruct (
+            Name <- p.name,
+            Type <- thisModule.typeVar(p),
+            tags <- thisModule.Parameter2Tag(p)
+        )
+}
+
+-- Regla perezosa (lazy) que transforma un parámetro en un parámetro de función.
+lazy rule Parameter2TransactionParameter {
+    from
+        p: IContract!Parameter
+    to
+        t: Go!Parameter (
+            Name <- p.name,
+            Type <- thisModule.typeVar(p)
+        )
+}
+
+-- Regla perezosa (lazy) que genera las etiquetas JSON para los parámetros.
+lazy rule Parameter2Tag {
+    from
+        s: IContract!Parameter
+    to
+        t: Go!Tag
+    do {
+        t.Name <- 'json:"' + s.name + '"';
+    }
+}
+
+-- Regla perezosa (lazy) que crea una importación de Go en base al contrato.
+lazy rule createImport {
+    from
+        s: IContract!SContract
+    to
+        t: Go!Import (
+            Name <- thisModule.customImportName,
+            Description <- thisModule.customImportDescription
+        )
+}
+
+-- Regla perezosa (lazy) que crea el paquete principal de Go.
+lazy rule createPackage {
+    from
+        s: IContract!SContract
+    to
+        t: Go!Package (
+            Name <- 'main',
+            Description <- 'Paquete principal'
+        )
+}
+
+-- Regla perezosa (lazy) que crea un tipo de función en Go.
+lazy rule createTypeFunction {
+    from
+        s: IContract!SContract
+    to
+        t: Go!TypeFunction (
+            VarName <- 'c',
+            StructName <- 'Contract'
+        )
+}
+
+-- Regla perezosa (lazy) que crea la estructura principal del struct del contrato.
+lazy rule createContract {
+    from
+        s: IContract!SContract
+    to
+        t: Go!Struct (
+            Name <- 'Contract',
+            variables <- thisModule.createContractVariable(s)
+        )
+}
+
+-- Regla perezosa (lazy) que crea la variable del struct del contrato.
+lazy rule createContractVariable {
+    from
+        s: IContract!SContract
+    to
+        t: Go!VariableStruct (
+            Name <- 'contractapi.Contract',
+            IsAnonym <- true,
+            Type <- thisModule.type
+        )
+}

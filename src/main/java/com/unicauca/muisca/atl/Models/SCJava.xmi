@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<hyperledgerJava:SmartContract xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:hyperledgerJava="http://www.example.org/hyperledgerJava" xsi:schemaLocation="http://www.example.org/hyperledgerJava hyperledgerJava.ecore" xmi:id="a1" SCName="contractEhr">
+  <packages xsi:type="hyperledgerJava:Package" xmi:id="a2" Name="main"/>
+  <contracts xsi:type="hyperledgerJava:Contract" xmi:id="a3" Name="Default">
+    <informations xsi:type="hyperledgerJava:Information" xmi:id="a4" Title="default" Description="Este es un ejemplo por defecto de la estructura de la metadata del contrato" Version="1.0">
+      <contacts xsi:type="hyperledgerJava:Contact" xmi:id="a5" Email="default@gmail.com" Name="default" UrlContact="www.google.com"/>
+      <licenses xsi:type="hyperledgerJava:License" xmi:id="a6" Name="default" UrlLicense="www.google.com"/>
+    </informations>
+  </contracts>
+  <transactions xsi:type="hyperledgerJava:Transaction" xmi:id="a7" Name="CreatePatient" TypeFunc="void" IsVoid="true" Return="" ObjectReturn="">
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a8" Name="ctx" TypeVar="Context"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a9" Name="ID"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a10" Name="name"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a11" Name="typeId"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a12" Name="phone" TypeVar="int"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a13" Name="address"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a14" Name="email"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a15" Name="clinicalData"/>
+  </transactions>
+  <transactions xsi:type="hyperledgerJava:Transaction" xmi:id="a16" Name="PatientExists" TypeFunc="boolean" Return="" ObjectReturn="">
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a17" Name="ctx" TypeVar="Context"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a18" Name="ID"/>
+  </transactions>
+  <transactions xsi:type="hyperledgerJava:Transaction" xmi:id="a19" Name="UpdatePatient" IsVoid="true" Return="" ObjectReturn="">
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a20" Name="ctx" TypeVar="Context"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a21" Name="ID"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a22" Name="clinicalData"/>
+  </transactions>
+  <transactions xsi:type="hyperledgerJava:Transaction" xmi:id="a23" Name="DeletePatient" IsVoid="true" Return="" ObjectReturn="">
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a24" Name="ctx" TypeVar="Context"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a25" Name="ID"/>
+  </transactions>
+  <transactions xsi:type="hyperledgerJava:Transaction" xmi:id="a26" Name="QueryPatient" Return="asset" ObjectReturn="Patient">
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a27" Name="ctx" TypeVar="Context"/>
+    <parameters xsi:type="hyperledgerJava:Parameter" xmi:id="a28" Name="ID"/>
+  </transactions>
+  <assets xsi:type="hyperledgerJava:Asset" xmi:id="a29" Name="Patient">
+    <properties xsi:type="hyperledgerJava:Property" xmi:id="a30" Name="ID"/>
+    <properties xsi:type="hyperledgerJava:Property" xmi:id="a31" Name="name"/>
+    <properties xsi:type="hyperledgerJava:Property" xmi:id="a32" Name="typeId"/>
+    <properties xsi:type="hyperledgerJava:Property" xmi:id="a33" Name="phone" TypeVar="int"/>
+    <properties xsi:type="hyperledgerJava:Property" xmi:id="a34" Name="address"/>
+    <properties xsi:type="hyperledgerJava:Property" xmi:id="a35" Name="email"/>
+    <properties xsi:type="hyperledgerJava:Property" xmi:id="a36" Name="clinicalData"/>
+  </assets>
+</hyperledgerJava:SmartContract>

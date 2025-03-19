@@ -1,0 +1,192 @@
+[comment encoding = UTF-8 /]
+[module generateHyper('http://www.example.org/hyperledgerGo')]
+
+
+[template public generateSmartContract(sc1: SmartContract)]
+[comment @main/]
+[file (sc1.FileName.concat('.go'), false, 'UTF-8')]
+package [sc1.packages.Name/]
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+[for (i: Import | sc1.imports)]
+	[generarImports(i)/]
+[/for]	
+)
+
+[for (s: Struct | sc1.structs)]
+[generarStruct(s)/]
+[/for]
+
+[for (f: Function | sc1.functions)]
+[generarFunction(f)/]
+[/for]
+
+
+[/file]
+[/template]
+
+[template public generarStruct(gs : Struct)]
+type [gs.Name.toUpperFirst()/] struct {
+[for (v: VariableStruct | gs.variables)]
+	[generarVariable(v)/]
+[/for]
+}
+[/template]
+
+[template public generarFunction(gf : Function) ? (TypeFunction <> null and ReturnType <> null)]
+func ([gf.typefunction.VarName/] *[gf.typefunction.StructName.toUpperFirst()/]) [gf.Name.toUpperFirst()/]([for (p: Parameter | gf.parameters) separator(', ')][generarParameter(p)/][/for]) ([gf.ReturnType/]){
+[gf.Instructions/]
+[if (gf.Name.toLowerCase().contains('exists'))]
+	[replaceExists(gf)/]JSON, err := ctx.GetStub().GetState([generarID(gf)/])
+	if err != nil {
+		return false, err
+	}
+	return [replaceExists(gf).toLowerFirst()/]JSON != nil, nil
+
+[elseif (gf.Name.toLowerCase().contains('query'))]
+	[replaceQuery(gf).toLowerFirst()/]JSON, err := ctx.GetStub().GetState([generarID(gf)/])
+	if err != nil {
+		return nil, err
+	}
+	if [replaceQuery(gf).toLowerFirst()/]JSON == nil {
+		return nil, fmt.Errorf("[replaceQuery(gf).toLowerFirst()/] with ID %s does not exist", [generarID(gf)/])
+	}
+
+	[replaceQuery(gf).toLowerFirst()/] := new([replaceQuery(gf).toUpperFirst()/])
+	err = json.Unmarshal([replaceQuery(gf).toLowerFirst()/]JSON, [replaceQuery(gf).toLowerFirst()/])
+	if err != nil {
+		return nil, err
+	}
+
+	return [replaceQuery(gf).toLowerFirst()/], nil
+
+[elseif (gf.Name.toLowerCase().contains('Read'))]
+[replaceRead(gf).toLowerFirst()/]JSON, err := ctx.GetStub().GetState([generarID(gf)/])
+	if err != nil {
+		return nil, err
+	}
+	if [replaceRead(gf).toLowerFirst()/]JSON == nil {
+		return nil, fmt.Errorf("[replaceRead(gf).toLowerFirst()/]/] with ID %s does not exist", [generarID(gf)/])
+	}
+
+	[replaceRead(gf).toLowerFirst()/] := new([replaceRead(gf).toUpperFirst()/])
+	err = json.Unmarshal([replaceRead(gf).toLowerFirst()/]JSON, [replaceRead(gf).toLowerFirst()/])
+	if err != nil {
+		return nil, err
+	}
+
+	return [replaceRead(gf).toLowerFirst()/], nil
+
+[elseif (gf.Name.toLowerCase().contains('update'))]
+	exists, err := [gf.typefunction.VarName/].[replaceUpdate(gf).toUpperFirst()/]Exists(ctx, [generarID(gf)/])
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("[replaceUpdate(gf)/] with ID %s does not exist", [generarID(gf)/])
+	}
+
+	[replaceUpdate(gf).toLowerFirst()/] := [replaceUpdate(gf).toUpperFirst()/]{
+		ID:		[generarID(gf)/],
+	}
+
+	[replaceUpdate(gf).toLowerFirst()/]JSON, err := json.Marshal([replaceUpdate(gf).toLowerFirst()/])
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState([generarID(gf)/], [replaceUpdate(gf).toLowerFirst()/]JSON)
+
+[elseif (gf.Name.toLowerCase().contains('delete') or gf.Name.toLowerCase().contains('del'))]
+	exists, err := [gf.typefunction.VarName/].[replaceDelete(gf).toUpperFirst()/]Exists(ctx, [generarID(gf)/])
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("[replaceDelete(gf)/] with ID %s does not exist", [generarID(gf)/])
+	}
+
+	return ctx.GetStub().DelState([generarID(gf)/])
+
+[elseif (gf.Name.toLowerCase().contains('create'))]
+	exists, err := [gf.typefunction.VarName/].[replaceCreate(gf).toUpperFirst()/]Exists(ctx, [generarID(gf)/])
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("The [replaceCreate(gf)/] %s already exists", [generarID(gf)/])
+	}
+
+	[replaceCreate(gf)/] := &[replaceCreate(gf).toUpperFirst()/]{
+		ID:   [for (p: Parameter | gf.parameters)][if ( p.Name.toLowerCase().contains('id'))][p.Name/][/if] [/for],		
+	}
+
+	[replaceCreate(gf)/]JSON, err := json.Marshal([replaceCreate(gf)/])
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState([generarID(gf)/], [replaceCreate(gf)/]JSON)
+
+[/if]
+}
+
+[/template]
+
+[template public generarFunction(gf : Function)]
+func [gf.Name/] ([for (p: Parameter | gf.parameters)][generarParameter(p)/][/for]){
+[gf.Instructions/]
+[if (gf.Name.matches('main'))]
+AssetChaincode, err := contractapi.NewChaincode(&SmartContract{})
+if err != nil {
+	log.Panicf("Error creating asset chaincode: %v", err)
+}
+if err := AssetChaincode.Start(); err != nil {
+	log.Panicf("Error starting asset chaincode: %v", err)
+}	
+[/if]
+}
+[/template]
+
+[template public generarVariable(gv : VariableStruct)]
+[if (not gv.IsAnonym)][gv.Name.toUpperFirst()/] [gv.Type/] `[gv.tags.Name/]`[elseif (gv.IsAnonym)][gv.Name/][/if]
+[/template]
+
+[template public generarParameter(gp : Parameter)]
+[gp.Name/] [gp.Type/]
+[/template]
+
+[template public generarImports(gi : Import)]
+"[gi.Name/]"
+[/template]
+
+[template public generarID(f : Function)]
+[for (p: Parameter | f.parameters)][if (p.Name.toLower().contains('id'))][p.Name/][/if] [/for]
+[/template]
+
+[template public replaceCreate(f : Function)]
+[f.Name.toLowerFirst().replace('create', '')/]
+[/template]
+
+[template public replaceDelete(f : Function)]
+[f.Name.toLowerFirst().replace('delete', '')/]
+[/template]
+
+[template public replaceUpdate(f : Function)]
+[f.Name.toLowerFirst().replace('update', '')/]
+[/template]
+
+[template public replaceRead(f : Function)]
+[f.Name.toLowerFirst().replace('read', '')/]
+[/template]
+
+[template public replaceQuery(f : Function)]
+[f.Name.toLowerFirst().replace('query', '')/]
+[/template]
+
+[template public replaceExists(f : Function)]
+[f.Name.toLowerFirst().replace('exists', '')/][f.Name.toLowerFirst().replace('exist', '')/]
+[/template]

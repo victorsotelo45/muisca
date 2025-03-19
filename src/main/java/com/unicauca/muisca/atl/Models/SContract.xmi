@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sclang:SContract
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:sclang="http://www.example.org/sclang"
+    xsi:schemaLocation="http://www.example.org/sclang sclang.ecore"
+    scName="PatienManagement">
+  <element xsi:type="sclang:Participant"
+      name="Patient">
+    <relationship
+        xsi:type="sclang:AssetRel"
+        name="relPatientToMedicalHistory">
+      <events
+          name="updatePatient"/>
+    </relationship>
+    <element
+        xsi:type="sclang:Asset"
+        name="medicalHistory"/>
+  </element>
+  <element xsi:type="sclang:Transaction"
+      name="CreatePatient"/>
+  <element xsi:type="sclang:Transaction"
+      name="ReadPatient"/>
+  <element xsi:type="sclang:Transaction"
+      name="UpdatePatient"/>
+  <element xsi:type="sclang:Transaction"
+      name="DeletePatient"/>
+  <element xsi:type="sclang:Transaction"
+      name="PatientExists"/>
+  <element xsi:type="sclang:Parameter"
+      name="ID"/>
+  <element xsi:type="sclang:Parameter"
+      name="Name"/>
+  <element xsi:type="sclang:Parameter"
+      name="TypeId"/>
+  <element xsi:type="sclang:Parameter"
+      name="Phone"/>
+  <element xsi:type="sclang:Parameter"
+      name="Age"/>
+  <element xsi:type="sclang:Parameter"
+      name="Address"/>
+  <element xsi:type="sclang:Parameter"
+      name="Email"/>
+  <element xsi:type="sclang:Parameter"
+      name="ClinicalData"/>
+</sclang:SContract>

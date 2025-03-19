@@ -1,0 +1,204 @@
+module Go2Java;
+
+-- @path Go= /Go_Java/hyperledgerGo.ecore
+-- @path Java= /Go_Java/hyperledgerJava.ecore
+
+-- Definición de los metamodelos
+create OUT: Java from IN: Go;
+
+-- Helpers
+---Definición de variables de Information
+helper def : title : String = 'default';
+helper def : description : String = 'Este es un ejemplo por defecto de la estructura de la metadata del contrato';
+helper def : version : String = '1.0';
+
+---Definición de variables de License
+helper def : nameLicense : String = 'default';
+helper def : license : String = 'www.google.com';
+
+---Definición de variables de Contact
+helper def : email : String = 'default@gmail.com';
+helper def : nameContact : String = 'default';
+helper def : contact : String = 'www.google.com';
+
+---Definición de variables de Transaction
+helper def : typeFunc(F: Go!Function) : String = 
+	if (F.Name.toLower().startsWith('create')) then
+		#void
+	else if(F.Name.toLower().endsWith('exist') or F.Name.toLower().endsWith('exists')) then
+		#boolean
+	else 
+		'String'
+	endif	
+	endif
+;
+
+helper def : isVoid(F: Go!Function) : Boolean = 
+	if (F.Name.toLower().startsWith('create') or F.Name.toLower().startsWith('update') or F.Name.toLower().startsWith('delete')) then
+		true
+	else
+		false
+	endif
+;
+
+helper def : objectReturn(S: OrderedSet(Go!Struct), F: Go!Function) : String =
+    S->iterate(struct; names : String = '' |
+        if((F.Name.toLower().startsWith('read') or F.Name.toLower().startsWith('query')) and not struct.Name.endsWith('ontract')) then
+            names.concat(struct.Name)
+        else
+            names.concat('')
+        endif
+    );
+
+helper def : return(F: Go!Function) : String =    
+	let name : String = '' in
+        if(F.Name.toLower().startsWith('read') or F.Name.toLower().startsWith('query')) then
+            name.concat('asset')
+        else
+            name.concat('')
+        endif
+    ;
+
+helper def : typeVar(F: Go!VariableStruct) : String = 
+	if (F.Type.toString().endsWith('ing')) then
+		'String'
+	else if(F.Type.toString().startsWith('[]i')) then
+		'int[]'
+	else if(F.Type.toString().startsWith('[]s')) then 
+		'String[]'
+	else if(F.Type.toString().startsWith('contract')) then
+		'Context'
+	else if(F.Type.toString().startsWith('int')) then
+		'int'
+	else if(F.Type.toString().endsWith('at64')) then
+		'double'
+	else if(F.Type.toString().endsWith('at32')) then
+		'float'
+	else 
+		'boolean'
+	endif
+	endif
+	endif
+	endif
+	endif
+	endif		
+	endif
+;
+
+-- Reglas de transformación
+rule SmartContract2SmartContract {
+	from
+		s: Go!SmartContract
+	to
+		t: Java!SmartContract (
+			SCName <- s.SCName,
+			imports <- s.imports,
+			packages <- s.packages,
+			contracts <- thisModule.createContract(s),
+			transactions <- s.functions,
+			assets <- s.structs.last()			
+		)
+}
+
+lazy rule createContract {
+    from
+        s: Go!SmartContract
+    to
+        t: Java!Contract (
+        	Name <- 'Default',
+        	informations <- thisModule.createInformation(s)	
+        )		
+}
+
+lazy rule createInformation {
+    from
+        s: Go!SmartContract
+    to
+        t: Java!Information (
+        	Title <- thisModule.title,
+			Description <- thisModule.description,
+			Version <- thisModule.version,
+        	licenses <- thisModule.createLicenses(s),
+			contacts <- thisModule.createContacts(s)
+        )		
+}
+
+lazy rule createLicenses {
+    from
+        s: Go!SmartContract
+    to
+        t: Java!License (
+        	Name <- thisModule.nameLicense,
+			UrlLicense <- thisModule.license				
+        )		
+}
+
+lazy rule createContacts {
+    from
+        s: Go!SmartContract
+    to
+        t: Java!Contact (
+        	Email <- thisModule.email,
+			Name <- thisModule.nameContact,
+			UrlContact <- thisModule.contact
+        )		
+}
+
+
+rule Function2Transaction {
+	from
+		s: Go!Function
+	to
+		t: Java!Transaction (
+			Name <- s.Name,					
+			Instructions <- s.Instructions,	
+			TypeFunc <- thisModule.typeFunc(s),
+			IsVoid <- thisModule.isVoid(s),
+			Return <- thisModule.return(s),
+			ObjectReturn <-  thisModule.objectReturn(Go!Struct.allInstances(), s),
+			parameters <- s.parameters			
+		)
+		
+}
+
+rule Parameter2Parameter {
+	from
+		s: Go!Parameter
+	to
+		t: Java!Parameter (
+			Name <- s.Name,
+			TypeVar <- thisModule.typeVar(s)
+		)
+}
+
+rule Struc2Asset {
+	from
+		s: Go!Struct (not s.Name.endsWith('Contract'))
+	to
+		t: Java!Asset (
+			packages <- Go!Package,
+			Name <- s.Name,			
+			properties <- s.variables
+		)
+}
+
+rule StructVariable2Property {
+	from
+		s: Go!VariableStruct (not s.Name.startsWith('contract'))
+	to
+		t: Java!Property (
+			Name <- s.Name,	
+			TypeVar <- thisModule.typeVar(s)
+		)
+}
+
+rule Package2Package {
+	from
+		s: Go!Package
+	to
+		t: Java!Package (
+			Name <- s.Name			
+		)
+}
+
+-- Fin del archivo ATL
