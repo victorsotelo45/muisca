@@ -79,11 +79,6 @@
 			<artifactId>org.eclipse.m2m.atl.engine.vm</artifactId>
 			<version>4.11.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.m2m.atl</groupId>
-			<artifactId>org.eclipse.m2m.atl.engine</artifactId>
-			<version>4.11.0</version>
-		</dependency>
 	</dependencies>
 
 	<build>
