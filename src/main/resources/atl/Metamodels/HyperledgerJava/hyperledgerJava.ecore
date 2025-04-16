@@ -45,13 +45,13 @@
         eType="#//License" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="TypeVariable">
-    <eLiterals name="String"/>
+    <eLiterals name="string"/>
     <eLiterals name="double" value="1"/>
     <eLiterals name="int" value="2"/>
     <eLiterals name="float" value="3"/>
     <eLiterals name="boolean" value="4"/>
-    <eLiterals name="int[]" value="5"/>
-    <eLiterals name="String[]" value="6"/>
+    <eLiterals name="intArray" value="5"/>
+    <eLiterals name="StringArray" value="6"/>
     <eLiterals name="enum" value="7"/>
     <eLiterals name="Context" value="8"/>
     <eLiterals name="byte" value="9"/>
@@ -71,10 +71,15 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ObjectReturn" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="TypeFunction">
-    <eLiterals name="String"/>
+    <eLiterals name="string"/>
     <eLiterals name="Double" value="1"/>
     <eLiterals name="void" value="2"/>
     <eLiterals name="boolean" value="3"/>
+    <eLiterals name="Int"/>
+    <eLiterals name="Float"/>
+    <eLiterals name="IntArray"/>
+    <eLiterals name="StringArray"/>
+    <eLiterals name="Context"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Parameter" eSuperTypes="#//Variable"/>
   <eClassifiers xsi:type="ecore:EClass" name="ContractElement" abstract="true">

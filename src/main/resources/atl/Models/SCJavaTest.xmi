@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ASCII"?>
+<hyperledgerJava:SmartContract xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:hyperledgerJava="http://www.example.org/hyperledgerJava" SCName="contractEhr">
+  <packages Name="main"/>
+  <contracts Name="Default">
+    <informations Title="default" Description="Este es un ejemplo por defecto de la estructura de la metadata del contrato" Version="1.0">
+      <contacts Email="default@gmail.com" Name="default" UrlContact="www.google.com"/>
+      <licenses Name="default" UrlLicense="www.google.com"/>
+    </informations>
+  </contracts>
+  <transactions Name="CreatePatient" TypeFunc="void" IsVoid="true" Return="" ObjectReturn="">
+    <parameters Name="ctx" TypeVar="boolean"/>
+    <parameters Name="ID"/>
+    <parameters Name="name"/>
+    <parameters Name="typeId"/>
+    <parameters Name="phone" TypeVar="boolean"/>
+    <parameters Name="address"/>
+    <parameters Name="email"/>
+    <parameters Name="clinicalData"/>
+  </transactions>
+  <transactions Name="PatientExists" TypeFunc="boolean" Return="" ObjectReturn="">
+    <parameters Name="ctx" TypeVar="boolean"/>
+    <parameters Name="ID"/>
+  </transactions>
+  <transactions Name="UpdatePatient" TypeFunc="string" IsVoid="true" Return="" ObjectReturn="">
+    <parameters Name="ctx" TypeVar="boolean"/>
+    <parameters Name="ID"/>
+    <parameters Name="clinicalData"/>
+  </transactions>
+  <transactions Name="DeletePatient" TypeFunc="string" IsVoid="true" Return="" ObjectReturn="">
+    <parameters Name="ctx" TypeVar="boolean"/>
+    <parameters Name="ID"/>
+  </transactions>
+  <transactions Name="QueryPatient" TypeFunc="string" Return="asset" ObjectReturn="Patient">
+    <parameters Name="ctx" TypeVar="boolean"/>
+    <parameters Name="ID"/>
+  </transactions>
+  <assets Name="Patient">
+    <properties Name="ID"/>
+    <properties Name="name"/>
+    <properties Name="typeId"/>
+    <properties Name="phone" TypeVar="boolean"/>
+    <properties Name="address"/>
+    <properties Name="email"/>
+    <properties Name="clinicalData"/>
+  </assets>
+</hyperledgerJava:SmartContract>
