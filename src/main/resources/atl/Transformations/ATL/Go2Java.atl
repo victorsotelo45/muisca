@@ -1,3 +1,4 @@
+-- @atlcompiler emftvm
 module Go2Java;
 
 -- @path Go= /Go_Java/hyperledgerGo.ecore
@@ -22,13 +23,13 @@ helper def : nameContact : String = 'default';
 helper def : contact : String = 'www.google.com';
 
 ---Definición de variables de Transaction
-helper def : typeFunc(F: Go!Function) : String = 
+helper def : typeFunc(F: Go!Function) : Java!TypeFunction = 
 	if (F.Name.toLower().startsWith('create')) then
 		#void
 	else if(F.Name.toLower().endsWith('exist') or F.Name.toLower().endsWith('exists')) then
 		#boolean
 	else 
-		'String'
+		#String
 	endif	
 	endif
 ;
@@ -41,7 +42,7 @@ helper def : isVoid(F: Go!Function) : Boolean =
 	endif
 ;
 
-helper def : objectReturn(S: OrderedSet(Go!Struct), F: Go!Function) : String =
+helper def : objectReturn(S: Sequence(Go!Struct), F: Go!Function) : String =
     S->iterate(struct; names : String = '' |
         if((F.Name.toLower().startsWith('read') or F.Name.toLower().startsWith('query')) and not struct.Name.endsWith('ontract')) then
             names.concat(struct.Name)
@@ -106,7 +107,7 @@ lazy rule createContract {
     to
         t: Java!Contract (
         	Name <- 'Default',
-        	informations <- thisModule.createInformation(s)	
+        	informations <- Sequence {s}->collect(sc | thisModule.createInformation(sc))
         )		
 }
 
@@ -118,8 +119,8 @@ lazy rule createInformation {
         	Title <- thisModule.title,
 			Description <- thisModule.description,
 			Version <- thisModule.version,
-        	licenses <- thisModule.createLicenses(s),
-			contacts <- thisModule.createContacts(s)
+        	licenses <- Sequence {s}->collect(sc | thisModule.createLicenses(sc)),
+			contacts <- Sequence {s}->collect(sc | thisModule.createContacts(sc))
         )		
 }
 

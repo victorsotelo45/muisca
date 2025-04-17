@@ -1,81 +1,160 @@
 package com.unicauca.muisca.application.service;
 
+import org.springframework.stereotype.Service;
+//import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Collections;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.BasicExtendedMetaData;
+import org.eclipse.emf.ecore.util.ExtendedMetaData;
+import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.m2m.atl.engine.vm.AtlLauncher;
-import org.springframework.stereotype.Service;
+import org.eclipse.m2m.atl.emftvm.EmftvmFactory;
+import org.eclipse.m2m.atl.emftvm.ExecEnv;
+import org.eclipse.m2m.atl.emftvm.Metamodel;
+import org.eclipse.m2m.atl.emftvm.Model;
+import org.eclipse.m2m.atl.emftvm.impl.resource.EMFTVMResourceFactoryImpl;
+import org.eclipse.m2m.atl.emftvm.util.DefaultModuleResolver;
+import org.eclipse.m2m.atl.emftvm.util.ModuleResolver;
+import org.eclipse.m2m.atl.emftvm.util.TimingData;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+/**
+ * An off-the-shelf launcher for ATL/EMFTVM transformations
+ * @author Victor Guana - guana@ualberta.ca
+ * University of Alberta - SSRG Lab.
+ * Edmonton, Alberta. Canada
+ * Using code examples from: https://wiki.eclipse.org/ATL/EMFTVM
+ */
 @Service
 public class AtlService {
+	
+	// Some constants for quick initialization and testing.
+	public final static String IN_METAMODEL_NAME = "Go";
+	public final static String OUT_METAMODEL_NAME = "Java";
 
-    public String executeTransformation(String transformationAsmPath,
-                                        String inputModelPath,
-                                        String inputMetamodelPath,
-                                        String outputMetamodelPath,
-                                        String outputModelPath,
-                                        String inputModelName,
-                                        String outputModelName) {
-        try {
-            // ✅ Registrar fábricas para .xmi y .ecore
-            Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
-            Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+	
+	// The input and output metamodel nsURIs are resolved using lazy registration of metamodels, see below.
+	private String inputMetamodelNsURI;
+	private String outputMetamodelNsURI;
+	
+	//Main transformation launch method
+	public void executeTransformation(String inMetamodelPath, String inModelPath, String outMetamodelPath,
+			String outModelPath, String transformationDir, String transformationModule){
+		
+		/* 
+		 * Creates the execution environment where the transformation is going to be executed,
+		 * you could use an execution pool if you want to run multiple transformations in parallel,
+		 * but for the purpose of the example let's keep it simple.
+		 */
+		ExecEnv env = EmftvmFactory.eINSTANCE.createExecEnv();
+		ResourceSet rs = new ResourceSetImpl();
 
-            // Crear el ResourceSet
-            ResourceSet resourceSet = new ResourceSetImpl();
+		/*
+		 * Load meta-models in the resource set we just created, the idea here is to make the meta-models
+		 * available in the context of the execution environment, the ResourceSet is later passed to the
+		 * ModuleResolver that is the actual class that will run the transformation.
+		 * Notice that we use the nsUris to locate the metamodels in the package registry, we initialize them 
+		 * from Ecore files that we registered lazily as shown below in e.g. registerInputMetamodel(...) 
+		 */
+		Metamodel inMetamodel = EmftvmFactory.eINSTANCE.createMetamodel();
+		inMetamodel.setResource(rs.getResource(URI.createURI(inputMetamodelNsURI), true));
+		env.registerMetaModel(IN_METAMODEL_NAME, inMetamodel);
+		
+		Metamodel outMetamodel = EmftvmFactory.eINSTANCE.createMetamodel();
+		outMetamodel.setResource(rs.getResource(URI.createURI(outputMetamodelNsURI), true));
+		env.registerMetaModel(OUT_METAMODEL_NAME, outMetamodel);
+		
+		/*
+		 * Create and register resource factories to read/parse .xmi and .emftvm files,
+		 * we need an .xmi parser because our in/output models are .xmi and our transformations are
+		 * compiled using the ATL-EMFTV compiler that generates .emftvm files
+		 */
+		rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
+		rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("emftvm", new EMFTVMResourceFactoryImpl());
+		
+		// Load models
+		Model inModel = EmftvmFactory.eINSTANCE.createModel();
+		inModel.setResource(rs.getResource(URI.createFileURI(inModelPath), true));
+		env.registerInputModel("IN", inModel);
+		
+		Model outModel = EmftvmFactory.eINSTANCE.createModel();
+		outModel.setResource(rs.createResource(URI.createURI(outModelPath)));
+		env.registerOutputModel("OUT", outModel);
+		
+		/*
+		 *  Load and run the transformation module
+		 *  Point at the directory your transformations are stored, the ModuleResolver will 
+		 *  look for the .emftvm file corresponding to the module you want to load and run
+		 */
+		ModuleResolver mr = new DefaultModuleResolver(transformationDir, rs);
+		TimingData td = new TimingData();
+		env.loadModule(mr, transformationModule);
+		td.finishLoading();
+		env.run(td);
+		td.finish();
+			
+		// Save models
+		try {
+			outModel.getResource().save(Collections.emptyMap());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 * I seriously hate relying on the eclipse facilities, and if you're not building an eclipse plugin
+	 * you can't rely on eclipse's registry (let's say you're building a stand-alone tool that needs to run ATL
+	 * transformation, you need to 'manually' register your metamodels) 
+	 * This method does two things, it initializes an Ecore parser and then programmatically looks for
+	 * the package definition on it, obtains the NsUri and registers it.
+	 */
+	private String lazyMetamodelRegistration(String metamodelPath){
+		
+		Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+   	
+	    ResourceSet rs = new ResourceSetImpl();
+	    // Enables extended meta-data, weird we have to do this but well...
+	    final ExtendedMetaData extendedMetaData = new BasicExtendedMetaData(EPackage.Registry.INSTANCE);
+	    rs.getLoadOptions().put(XMLResource.OPTION_EXTENDED_META_DATA, extendedMetaData);
+	
+	    Resource r = rs.getResource(URI.createFileURI(metamodelPath), true);
+	    EObject eObject = r.getContents().get(0);
+	    // A meta-model might have multiple packages we assume the main package is the first one listed
+	    if (eObject instanceof EPackage) {
+	        EPackage p = (EPackage)eObject;
+	        System.out.println(p.getNsURI());
+	        EPackage.Registry.INSTANCE.put(p.getNsURI(), p);
+	        return p.getNsURI();
+	    }
+	    return null;
+	}
+	
+	/*
+	 * As shown above we need the inputMetamodelNsURI and the outputMetamodelNsURI to create the context of
+	 * the transformation, so we simply use the return value of lazyMetamodelRegistration to store them.
+	 * -- Notice that the lazyMetamodelRegistration(..) implementation may return null in case it doesn't 
+	 * find a package in the given metamodel, so watch out for malformed metamodels.
+	 * 
+	 */
+	public void registerInputMetamodel(String inputMetamodelPath){	
+		inputMetamodelNsURI = lazyMetamodelRegistration(inputMetamodelPath);
+		if (inputMetamodelNsURI == null) {
+			throw new IllegalArgumentException("Error al registrar el metamodelo de entrada: " + inputMetamodelPath);
+		}
+	}
 
-            // Cargar metamodelos
-            EPackage inputMetamodel = loadMetamodel(resourceSet, inputMetamodelPath);
-            EPackage outputMetamodel = loadMetamodel(resourceSet, outputMetamodelPath);
+	public void registerOutputMetamodel(String outputMetamodelPath){
+		outputMetamodelNsURI = lazyMetamodelRegistration(outputMetamodelPath);
+		if (outputMetamodelNsURI == null) {
+			throw new IllegalArgumentException("Error al registrar el metamodelo de salida: " + outputMetamodelPath);
+		}
+	}
 
-            // Registrar metamodelos globalmente
-            EPackage.Registry.INSTANCE.put(inputMetamodel.getNsURI(), inputMetamodel);
-            EPackage.Registry.INSTANCE.put(outputMetamodel.getNsURI(), outputMetamodel);
-
-            // Cargar modelo de entrada y preparar modelo de salida
-            Resource inputModel = resourceSet.getResource(URI.createFileURI(inputModelPath), true);
-            Resource outputModel = resourceSet.createResource(URI.createFileURI(outputModelPath));
-
-            // Configurar ejecución ATL
-            Map<String, Object> options = new HashMap<>();
-            options.put("allowInterModelReferences", true);
-
-            AtlLauncher launcher = AtlLauncher.getDefault();
-
-            launcher.launch(
-                    new File(transformationAsmPath).toURI().toURL(),
-                    new HashMap<>(),
-                    Map.of(
-                            inputModelName, inputModel,
-                            outputModelName, outputModel
-                    ),
-                    new HashMap<>(),
-                    List.of(),
-                    options,
-                    null
-            );
-
-            // Guardar el modelo de salida
-            outputModel.save(Map.of());
-
-            return "✅ Transformación completada exitosamente.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "❌ Error durante la transformación: " + e.getMessage();
-        }
-    }
-
-    private EPackage loadMetamodel(ResourceSet resourceSet, String metamodelPath) throws Exception {
-        Resource metamodelResource = resourceSet.getResource(URI.createFileURI(metamodelPath), true);
-        return (EPackage) metamodelResource.getContents().get(0);
-    }
 }
