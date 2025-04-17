@@ -49,6 +49,9 @@ public class AtlController {
             System.out.println("Ruta del metamodelo de entrada: " + inMetamodelFile.getAbsolutePath());
             System.out.println("Ruta del metamodelo de salida: " + outMetamodelFile.getAbsolutePath());
 
+            // Registrar metamodelos
+            atlService.registerInputMetamodel(inMetamodelFile.getAbsolutePath());
+            atlService.registerOutputMetamodel(outMetamodelFile.getAbsolutePath());
 
             // Ejecutar la transformación
             atlService.executeTransformation(
