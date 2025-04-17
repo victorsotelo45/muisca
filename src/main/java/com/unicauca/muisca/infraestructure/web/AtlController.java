@@ -14,7 +14,7 @@ import java.io.IOException;
 public class AtlController {
 
     // Directorio base donde se encuentran las transformaciones
-    public final static String TRANSFORMATION_DIR = "atl/Transformations/ATL/";
+    public final static String TRANSFORMATION_DIR = "src/main/resources/atl/Transformations/ATL/";
     public final static String OUT_MODEL = "src/main/resources/atl/Models/SCJavaTest.xmi";
 
     @Autowired

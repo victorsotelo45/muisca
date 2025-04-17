@@ -81,7 +81,7 @@ public class AtlService {
 		
 		// Load models
 		Model inModel = EmftvmFactory.eINSTANCE.createModel();
-		inModel.setResource(rs.getResource(URI.createURI(inModelPath, true), true));
+		inModel.setResource(rs.getResource(URI.createFileURI(inModelPath), true));
 		env.registerInputModel("IN", inModel);
 		
 		Model outModel = EmftvmFactory.eINSTANCE.createModel();
