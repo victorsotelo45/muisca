@@ -29,7 +29,7 @@ helper def : typeFunc(F: Go!Function) : Java!TypeFunction =
 	else if(F.Name.toLower().endsWith('exist') or F.Name.toLower().endsWith('exists')) then
 		#boolean
 	else 
-		#String
+		#string
 	endif	
 	endif
 ;
@@ -60,29 +60,55 @@ helper def : return(F: Go!Function) : String =
         endif
     ;
 
-helper def : typeVar(F: Go!VariableStruct) : String = 
-	if (F.Type.toString().endsWith('ing')) then
-		'String'
-	else if(F.Type.toString().startsWith('[]i')) then
-		'int[]'
-	else if(F.Type.toString().startsWith('[]s')) then 
-		'String[]'
-	else if(F.Type.toString().startsWith('contract')) then
-		'Context'
-	else if(F.Type.toString().startsWith('int')) then
-		'int'
-	else if(F.Type.toString().endsWith('at64')) then
-		'double'
-	else if(F.Type.toString().endsWith('at32')) then
-		'float'
-	else 
-		'boolean'
+helper def : typeVar(F: Go!VariableStruct) : Java!TypeVariable = 
+    if (F.Type.toString().endsWith('ing')) then
+        #string
+    else if (F.Type.toString().startsWith('[]i')) then
+        #intArray
+    else if (F.Type.toString().startsWith('[]s')) then
+        #StringArray
+    else if (F.Type.toString().startsWith('contract')) then
+        #Context
+    else if (F.Type.toString().startsWith('int')) then
+        #int
+    else if (F.Type.toString().endsWith('at64')) then
+        #double
+    else if (F.Type.toString().endsWith('at32')) then
+        #float
+    else
+        #boolean
 	endif
 	endif
 	endif
 	endif
 	endif
 	endif		
+	endif
+;
+
+helper def : typeVarParam(P: Go!Parameter) : Java!TypeVariable = 
+    if (P.Type.toString().endsWith('ing')) then
+        #string
+    else if (P.Type.toString().startsWith('[]i')) then
+        #intArray
+    else if (P.Type.toString().startsWith('[]s')) then
+        #StringArray
+    else if (P.Type.toString().startsWith('contract')) then
+        #Context
+    else if (P.Type.toString().startsWith('int')) then
+        #int
+    else if (P.Type.toString().endsWith('at64')) then
+        #double
+    else if (P.Type.toString().endsWith('at32')) then
+        #float
+    else
+        #boolean
+	endif
+	endif		
+	endif
+	endif
+	endif
+	endif
 	endif
 ;
 
@@ -168,7 +194,7 @@ rule Parameter2Parameter {
 	to
 		t: Java!Parameter (
 			Name <- s.Name,
-			TypeVar <- thisModule.typeVar(s)
+			TypeVar <- thisModule.typeVarParam(s)
 		)
 }
 
