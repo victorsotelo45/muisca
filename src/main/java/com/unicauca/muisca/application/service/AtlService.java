@@ -36,23 +36,16 @@ import org.eclipse.m2m.atl.emftvm.util.TimingData;
 public class AtlService {
 	
 	// Some constants for quick initialization and testing.
-	public final static String IN_METAMODEL = "src/main/resources/atl/Metamodels/HyperledgerGo/hyperledgerGo.ecore";
 	public final static String IN_METAMODEL_NAME = "Go";
-	public final static String OUT_METAMODEL = "src/main/resources/atl/Metamodels/HyperledgerJava/hyperledgerJava.ecore";
 	public final static String OUT_METAMODEL_NAME = "Java";
-	
-	public final static String IN_MODEL = "src/main/resources/atl/Models/SCGo.xmi";
-	public final static String OUT_MODEL = "src/main/resources/atl/Models/SCJavaTest.xmi";
-	
-	public final static String TRANSFORMATION_DIR = "src/main/resources/atl/Transformations/ATL/";
-	public final static String TRANSFORMATION_MODULE= "Go2Java";
+
 	
 	// The input and output metamodel nsURIs are resolved using lazy registration of metamodels, see below.
 	private String inputMetamodelNsURI;
 	private String outputMetamodelNsURI;
 	
 	//Main transformation launch method
-	public void launch(String inMetamodelPath, String inModelPath, String outMetamodelPath,
+	public void executeTransformation(String inMetamodelPath, String inModelPath, String outMetamodelPath,
 			String outModelPath, String transformationDir, String transformationModule){
 		
 		/* 
@@ -102,7 +95,7 @@ public class AtlService {
 		 */
 		ModuleResolver mr = new DefaultModuleResolver(transformationDir, rs);
 		TimingData td = new TimingData();
-		env.loadModule(mr, TRANSFORMATION_MODULE);
+		env.loadModule(mr, transformationModule);
 		td.finishLoading();
 		env.run(td);
 		td.finish();
