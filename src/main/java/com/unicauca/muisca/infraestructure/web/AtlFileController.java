@@ -1,5 +1,6 @@
 package com.unicauca.muisca.infraestructure.web;
 
+import com.unicauca.muisca.domain.dto.AtlFileDTO;
 import com.unicauca.muisca.domain.model.AtlFile;
 import com.unicauca.muisca.domain.model.UserEntity;
 import com.unicauca.muisca.domain.repository.AtlFileRepository;
@@ -48,14 +49,15 @@ public class AtlFileController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AtlFile>> listFiles(Authentication authentication) {
-        // Obtener el usuario autenticado
+    public ResponseEntity<List<AtlFileDTO>> listFiles(Authentication authentication) {
         String username = authentication.getName();
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Buscar archivos del usuario
-        List<AtlFile> files = atlFileRepository.findByUser(user);
+        List<AtlFileDTO> files = atlFileRepository.findByUser(user).stream()
+                .map(file -> new AtlFileDTO(file.getId(), file.getFilename(), file.getFileType(), file.getCreatedAt()))
+                .toList();
+
         return ResponseEntity.ok(files);
     }
 
