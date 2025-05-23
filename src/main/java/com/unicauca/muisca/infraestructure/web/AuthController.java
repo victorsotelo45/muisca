@@ -34,7 +34,10 @@ public class AuthController {
                             authRequest.getUsername(),
                             authRequest.getPassword()));
 
-            String token = jwtUtil.generateToken(authRequest.getUsername());
+            UserEntity user = userService.findByUsername(authRequest.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            String role = user.getRole();
+            String token = jwtUtil.generateToken(authRequest.getUsername(), role);
             return new AuthResponse(token);
 
         } catch (AuthenticationException e) {
@@ -45,10 +48,26 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         try {
-            UserEntity user = userService.registerUser(request.getUsername(), request.getPassword(), request.getRole());
+            UserEntity user = userService.registerUser(request.getUsername(), request.getPassword(), "USER");
             return ResponseEntity.ok("Usuario registrado con éxito: " + user.getUsername());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Token inválido o expirado");
+        }
+        String username = authentication.getName();
+        String role = authentication.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority())
+                .orElse("ROLE_USER");
+        return ResponseEntity.ok(
+                java.util.Map.of(
+                        "username", username,
+                        "role", role));
     }
 }
