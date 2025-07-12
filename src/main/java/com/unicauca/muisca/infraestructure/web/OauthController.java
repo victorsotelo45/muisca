@@ -8,6 +8,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import java.io.IOException;
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.api.client.util.Value;
 import com.unicauca.muisca.application.service.UserService;
 import com.unicauca.muisca.domain.dto.TokenDto;
 import com.unicauca.muisca.domain.model.UserEntity;
@@ -27,7 +27,7 @@ import com.unicauca.muisca.infraestructure.config.jwt.JwtUtil;
 public class OauthController {
 
     @Value("${google.client.id}")
-    String googleClientId;
+    private String googleClientId;
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
