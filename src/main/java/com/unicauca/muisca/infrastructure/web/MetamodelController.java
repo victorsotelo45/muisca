@@ -1,11 +1,13 @@
 package com.unicauca.muisca.infrastructure.web;
 
+import com.unicauca.muisca.application.dto.MetadataRequest;
 import com.unicauca.muisca.application.dto.MetamodelResponse;
 import com.unicauca.muisca.application.service.MetamodelService;
 import com.unicauca.muisca.domain.model.Metamodel;
 import com.unicauca.muisca.domain.model.UserEntity;
 import com.unicauca.muisca.infrastructure.security.CurrentUser;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +51,13 @@ public class MetamodelController {
             @RequestParam(required = false) MultipartFile genmodelFile,
             @CurrentUser UserEntity actor) {
         return metamodelService.create(name, description, Files.upload(ecoreFile), Files.upload(genmodelFile), actor);
+    }
+
+    /** Cambia nombre y descripción (el archivo no se modifica). */
+    @PatchMapping("/{id}")
+    public MetamodelResponse updateMetadata(@PathVariable Long id, @Valid @RequestBody MetadataRequest request,
+            @CurrentUser UserEntity actor) {
+        return metamodelService.updateMetadata(id, request, actor);
     }
 
     @DeleteMapping("/{id}")

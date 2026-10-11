@@ -57,6 +57,11 @@ public class Metamodel {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void describe(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     public Long getId() {
         return id;
     }

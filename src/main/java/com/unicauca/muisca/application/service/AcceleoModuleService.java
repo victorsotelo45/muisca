@@ -1,5 +1,6 @@
 package com.unicauca.muisca.application.service;
 
+import com.unicauca.muisca.application.dto.MetadataRequest;
 import com.unicauca.muisca.application.dto.AcceleoModuleResponse;
 import com.unicauca.muisca.application.dto.UploadedFile;
 import com.unicauca.muisca.application.exception.ConflictException;
@@ -71,6 +72,19 @@ public class AcceleoModuleService {
         Permissions.requireOwnerOrAdmin(actor, module.getCreatedBy(), "el módulo Acceleo");
         List<ArtifactProblem> warnings = compileInto(module, templateFile);
         return AcceleoModuleResponse.from(acceleoModuleRepository.save(module), warnings);
+    }
+
+    /** Cambia nombre y descripción sin recompilar el código. */
+    @Transactional
+    public AcceleoModuleResponse updateMetadata(Long id, MetadataRequest request, UserEntity actor) {
+        AcceleoModule module = find(id);
+        Permissions.requireOwnerOrAdmin(actor, module.getCreatedBy(), "el módulo Acceleo");
+        String name = request.name().trim();
+        if (acceleoModuleRepository.existsByNameAndIdNot(name, id)) {
+            throw new ConflictException("Ya existe un módulo Acceleo con el nombre '" + name + "'");
+        }
+        module.describe(name, StoredModelService.blankToNull(request.description()));
+        return AcceleoModuleResponse.from(acceleoModuleRepository.save(module));
     }
 
     @Transactional

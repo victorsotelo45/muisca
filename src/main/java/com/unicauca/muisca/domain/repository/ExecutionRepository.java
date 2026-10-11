@@ -24,6 +24,10 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long> {
     boolean existsByExecutedBy(UserEntity user);
 
     @Modifying
+    @Query("delete from Execution e where e.executedBy = :user")
+    void deleteByExecutedBy(UserEntity user);
+
+    @Modifying
     @Query("update Execution e set e.transformation = null where e.transformation = :transformation")
     void detachFromTransformation(Transformation transformation);
 }

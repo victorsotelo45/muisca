@@ -10,6 +10,8 @@ public interface AtlModuleRepository extends JpaRepository<AtlModule, Long> {
 
     boolean existsByName(String name);
 
+    boolean existsByNameAndIdNot(String name, Long id);
+
     boolean existsBySourceMetamodelOrTargetMetamodel(Metamodel source, Metamodel target);
 
     List<AtlModule> findAllByOrderByNameAsc();

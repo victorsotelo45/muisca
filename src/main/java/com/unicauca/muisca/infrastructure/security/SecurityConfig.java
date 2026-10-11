@@ -3,6 +3,7 @@ package com.unicauca.muisca.infrastructure.security;
 import com.unicauca.muisca.domain.repository.UserRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,7 +29,8 @@ import java.util.List;
  * <li>ADMIN: todo, incluida la gestión de usuarios y la publicación de transformaciones.</li>
  * <li>MODEL_ENGINEER: metamodelos, módulos ATL/Acceleo, espacio de trabajo y definición de
  * transformaciones (sin publicarlas).</li>
- * <li>USER: consulta y ejecuta las transformaciones publicadas y gestiona sus ejecuciones.</li>
+ * <li>USER: consulta y ejecuta las transformaciones publicadas y gestiona sus ejecuciones, sus
+ * modelos y su propia cuenta.</li>
  * </ul>
  */
 @Configuration
@@ -51,8 +53,10 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, e) -> writeJson(response, 403, "Forbidden",
                                 "Su rol no tiene permiso para acceder a este recurso.")))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register", "/oauth/**", "/error").permitAll()
-                        .requestMatchers("/api/users/**").hasRole(ADMIN)
+                        .requestMatchers("/auth/login", "/auth/register", "/oauth/**", "/error", "/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/settings/public").permitAll()
+                        .requestMatchers("/api/users/**", "/api/settings/**").hasRole(ADMIN)
+                        .requestMatchers("/api/account/**", "/api/models/**").authenticated()
                         .requestMatchers("/api/metamodels/**", "/api/atl-modules/**", "/api/acceleo-modules/**",
                                 "/api/workspace/**").hasAnyRole(MODEL_ENGINEER, ADMIN)
                         .requestMatchers(HttpMethod.PATCH, "/api/transformations/*/publication").hasRole(ADMIN)
@@ -79,10 +83,14 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /** Orígenes del frontend (propiedad app.cors.allowed-origins / variable CORS_ALLOWED_ORIGINS). */
+    @Value("${app.cors.allowed-origins:http://localhost:4200}")
+    private List<String> allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedOrigins(allowedOrigins.stream().map(String::trim).filter(o -> !o.isEmpty()).toList());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Content-Disposition"));

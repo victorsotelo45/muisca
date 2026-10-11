@@ -4,7 +4,9 @@ import com.unicauca.muisca.application.dto.ExecutionResponse;
 import com.unicauca.muisca.application.dto.PublicationRequest;
 import com.unicauca.muisca.application.dto.TransformationRequest;
 import com.unicauca.muisca.application.dto.TransformationResponse;
+import com.unicauca.muisca.application.dto.UploadedFile;
 import com.unicauca.muisca.application.service.ExecutionService;
+import com.unicauca.muisca.application.service.StoredModelService;
 import com.unicauca.muisca.application.service.TransformationService;
 import com.unicauca.muisca.domain.model.ExecutionStatus;
 import com.unicauca.muisca.domain.model.UserEntity;
@@ -29,10 +31,13 @@ public class TransformationController {
 
     private final TransformationService transformationService;
     private final ExecutionService executionService;
+    private final StoredModelService storedModelService;
 
-    public TransformationController(TransformationService transformationService, ExecutionService executionService) {
+    public TransformationController(TransformationService transformationService, ExecutionService executionService,
+            StoredModelService storedModelService) {
         this.transformationService = transformationService;
         this.executionService = executionService;
+        this.storedModelService = storedModelService;
     }
 
     @GetMapping
@@ -72,13 +77,22 @@ public class TransformationController {
     }
 
     /**
-     * El usuario sube su modelo y obtiene el resultado. Responde 201 si la ejecución terminó
-     * bien y 422 si el motor falló; en ambos casos la ejecución queda en el historial.
+     * El usuario sube su modelo (inputModel) o elige uno de su biblioteca (modelId) y obtiene el
+     * resultado. Responde 201 si la ejecución terminó bien y 422 si el motor falló; en ambos
+     * casos la ejecución queda en el historial.
      */
     @PostMapping(path = "/{id}/executions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ExecutionResponse> execute(@PathVariable Long id, @RequestParam MultipartFile inputModel,
+    public ResponseEntity<ExecutionResponse> execute(@PathVariable Long id,
+            @RequestParam(required = false) MultipartFile inputModel,
+            @RequestParam(required = false) Long modelId,
             @CurrentUser UserEntity actor) {
-        ExecutionResponse execution = executionService.execute(id, Files.upload(inputModel), actor);
+        if ((inputModel == null) == (modelId == null)) {
+            throw new IllegalArgumentException("Envíe el archivo del modelo (inputModel) o el id de un modelo "
+                    + "guardado (modelId), pero no ambos");
+        }
+        UploadedFile model = inputModel != null ? Files.upload(inputModel)
+                : storedModelService.asUploadedFile(modelId, actor);
+        ExecutionResponse execution = executionService.execute(id, model, actor);
         HttpStatus status = execution.status() == ExecutionStatus.SUCCEEDED ? HttpStatus.CREATED
                 : HttpStatus.UNPROCESSABLE_ENTITY;
         return ResponseEntity.status(status).body(execution);

@@ -1,11 +1,13 @@
 package com.unicauca.muisca.infrastructure.web;
 
+import com.unicauca.muisca.application.dto.MetadataRequest;
 import com.unicauca.muisca.application.dto.AtlModuleResponse;
 import com.unicauca.muisca.application.service.AtlModuleService;
 import com.unicauca.muisca.domain.model.AtlModule;
 import com.unicauca.muisca.domain.model.UserEntity;
 import com.unicauca.muisca.infrastructure.security.CurrentUser;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +61,13 @@ public class AtlModuleController {
     public AtlModuleResponse updateSource(@PathVariable Long id, @RequestParam MultipartFile atlFile,
             @CurrentUser UserEntity actor) {
         return atlModuleService.updateSource(id, Files.upload(atlFile), actor);
+    }
+
+    /** Cambia nombre y descripción (el archivo no se modifica). */
+    @PatchMapping("/{id}")
+    public AtlModuleResponse updateMetadata(@PathVariable Long id, @Valid @RequestBody MetadataRequest request,
+            @CurrentUser UserEntity actor) {
+        return atlModuleService.updateMetadata(id, request, actor);
     }
 
     @DeleteMapping("/{id}")

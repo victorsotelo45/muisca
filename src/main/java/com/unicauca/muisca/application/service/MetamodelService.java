@@ -1,5 +1,6 @@
 package com.unicauca.muisca.application.service;
 
+import com.unicauca.muisca.application.dto.MetadataRequest;
 import com.unicauca.muisca.application.dto.MetamodelResponse;
 import com.unicauca.muisca.application.dto.UploadedFile;
 import com.unicauca.muisca.application.exception.ConflictException;
@@ -11,6 +12,7 @@ import com.unicauca.muisca.domain.model.UserEntity;
 import com.unicauca.muisca.domain.repository.AcceleoModuleRepository;
 import com.unicauca.muisca.domain.repository.AtlModuleRepository;
 import com.unicauca.muisca.domain.repository.MetamodelRepository;
+import com.unicauca.muisca.domain.repository.StoredModelRepository;
 import com.unicauca.muisca.domain.repository.TransformationRepository;
 
 import org.springframework.stereotype.Service;
@@ -25,15 +27,17 @@ public class MetamodelService {
     private final AtlModuleRepository atlModuleRepository;
     private final AcceleoModuleRepository acceleoModuleRepository;
     private final TransformationRepository transformationRepository;
+    private final StoredModelRepository storedModelRepository;
     private final MetamodelInspector inspector;
 
     public MetamodelService(MetamodelRepository metamodelRepository, AtlModuleRepository atlModuleRepository,
             AcceleoModuleRepository acceleoModuleRepository, TransformationRepository transformationRepository,
-            MetamodelInspector inspector) {
+            StoredModelRepository storedModelRepository, MetamodelInspector inspector) {
         this.metamodelRepository = metamodelRepository;
         this.atlModuleRepository = atlModuleRepository;
         this.acceleoModuleRepository = acceleoModuleRepository;
         this.transformationRepository = transformationRepository;
+        this.storedModelRepository = storedModelRepository;
         this.inspector = inspector;
     }
 
@@ -74,6 +78,19 @@ public class MetamodelService {
         return MetamodelResponse.from(metamodelRepository.save(metamodel), info.warnings());
     }
 
+    /** Cambia nombre y descripción; el archivo .ecore (y su nsURI) no se modifican. */
+    @Transactional
+    public MetamodelResponse updateMetadata(Long id, MetadataRequest request, UserEntity actor) {
+        Metamodel metamodel = find(id);
+        Permissions.requireOwnerOrAdmin(actor, metamodel.getCreatedBy(), "el metamodelo");
+        String name = request.name().trim();
+        if (metamodelRepository.existsByNameAndIdNot(name, id)) {
+            throw new ConflictException("Ya existe un metamodelo con el nombre '" + name + "'");
+        }
+        metamodel.describe(name, StoredModelService.blankToNull(request.description()));
+        return MetamodelResponse.from(metamodelRepository.save(metamodel));
+    }
+
     @Transactional
     public void delete(Long id, UserEntity actor) {
         Metamodel metamodel = find(id);
@@ -83,6 +100,10 @@ public class MetamodelService {
                 || transformationRepository.existsByInputMetamodel(metamodel)) {
             throw new ConflictException("El metamodelo '" + metamodel.getName() + "' está en uso por módulos o "
                     + "transformaciones; elimínelos primero");
+        }
+        if (storedModelRepository.existsByMetamodel(metamodel)) {
+            throw new ConflictException("El metamodelo '" + metamodel.getName() + "' tiene modelos guardados en "
+                    + "bibliotecas de usuarios; deben eliminarse primero");
         }
         metamodelRepository.delete(metamodel);
     }

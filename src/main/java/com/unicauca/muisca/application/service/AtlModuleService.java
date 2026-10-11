@@ -1,5 +1,6 @@
 package com.unicauca.muisca.application.service;
 
+import com.unicauca.muisca.application.dto.MetadataRequest;
 import com.unicauca.muisca.application.dto.AtlModuleResponse;
 import com.unicauca.muisca.application.dto.UploadedFile;
 import com.unicauca.muisca.application.exception.ConflictException;
@@ -72,6 +73,19 @@ public class AtlModuleService {
         Permissions.requireOwnerOrAdmin(actor, module.getCreatedBy(), "el módulo ATL");
         List<ArtifactProblem> warnings = compileInto(module, atlFile);
         return AtlModuleResponse.from(atlModuleRepository.save(module), warnings);
+    }
+
+    /** Cambia nombre y descripción sin recompilar el código. */
+    @Transactional
+    public AtlModuleResponse updateMetadata(Long id, MetadataRequest request, UserEntity actor) {
+        AtlModule module = find(id);
+        Permissions.requireOwnerOrAdmin(actor, module.getCreatedBy(), "el módulo ATL");
+        String name = request.name().trim();
+        if (atlModuleRepository.existsByNameAndIdNot(name, id)) {
+            throw new ConflictException("Ya existe un módulo ATL con el nombre '" + name + "'");
+        }
+        module.describe(name, StoredModelService.blankToNull(request.description()));
+        return AtlModuleResponse.from(atlModuleRepository.save(module));
     }
 
     @Transactional

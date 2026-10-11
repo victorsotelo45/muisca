@@ -16,4 +16,12 @@ public interface MetamodelInspector {
 
     /** @throws com.unicauca.muisca.application.exception.InvalidArtifactException si el modelo no es conforme */
     void validateModel(Metamodel metamodel, String fileName, byte[] model);
+
+    /**
+     * nsURI del metamodelo al que dice pertenecer el modelo (el de su elemento raíz).
+     *
+     * @throws com.unicauca.muisca.application.exception.InvalidArtifactException si no es XML válido
+     *         o su raíz no declara un espacio de nombres
+     */
+    String modelNsUri(String fileName, byte[] model);
 }

@@ -5,7 +5,6 @@ import com.unicauca.muisca.application.dto.AuthResponse;
 import com.unicauca.muisca.application.dto.RegisterRequest;
 import com.unicauca.muisca.application.dto.UserResponse;
 import com.unicauca.muisca.application.service.UserService;
-import com.unicauca.muisca.domain.model.Role;
 import com.unicauca.muisca.domain.model.UserEntity;
 import com.unicauca.muisca.infrastructure.security.CurrentUser;
 import com.unicauca.muisca.infrastructure.security.JwtUtil;
@@ -42,7 +41,7 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse register(@Valid @RequestBody RegisterRequest request) {
-        return UserResponse.from(userService.register(request.username(), request.password(), Role.USER));
+        return UserResponse.from(userService.selfRegister(request.username(), request.password()));
     }
 
     @GetMapping("/validate")

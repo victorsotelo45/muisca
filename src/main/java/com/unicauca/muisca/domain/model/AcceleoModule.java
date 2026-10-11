@@ -64,6 +64,12 @@ public class AcceleoModule {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void describe(String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }

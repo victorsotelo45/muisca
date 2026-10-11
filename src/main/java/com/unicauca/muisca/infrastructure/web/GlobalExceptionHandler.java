@@ -151,8 +151,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> unexpected(Exception e) {
+        // El detalle queda en el log; al cliente no se le exponen mensajes internos.
         log.error("Error no controlado", e);
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor: " + e.getMessage());
+        return build(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Ocurrió un error interno en el servidor. Intente de nuevo o contacte al administrador.");
     }
 
     private static ResponseEntity<Map<String, Object>> build(HttpStatus status, String message) {

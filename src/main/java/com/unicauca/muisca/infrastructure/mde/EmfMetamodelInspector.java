@@ -12,7 +12,13 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.springframework.stereotype.Component;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @Component
@@ -66,6 +72,53 @@ public class EmfMetamodelInspector implements MetamodelInspector {
             throw new InvalidArtifactException("El modelo '" + fileName + "' pertenece al metamodelo '" + rootNsUri
                     + "', pero esta transformación espera un modelo de " + metamodel.getName() + " ("
                     + metamodel.getNsUri() + ")");
+        }
+    }
+
+    @Override
+    public String modelNsUri(String fileName, byte[] model) {
+        EmfSupport.requireSafeXml(fileName, model);
+        RootNamespace handler = new RootNamespace();
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.newSAXParser().parse(new ByteArrayInputStream(model), handler);
+        } catch (RootFound found) {
+            return found.nsUri;
+        } catch (InvalidArtifactException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InvalidArtifactException("No se pudo leer el modelo '" + fileName + "': "
+                    + EmfSupport.rootMessage(e));
+        }
+        throw new InvalidArtifactException("El modelo '" + fileName + "' está vacío");
+    }
+
+    /** Detiene la lectura en el primer elemento que no sea el contenedor xmi:XMI. */
+    private static final class RootNamespace extends DefaultHandler {
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes)
+                throws SAXException {
+            boolean xmiWrapper = "XMI".equals(localName) && uri != null && uri.startsWith("http://www.omg.org/");
+            if (xmiWrapper) {
+                return;
+            }
+            if (uri == null || uri.isBlank()) {
+                throw new InvalidArtifactException("La raíz del modelo <" + qName + "> no declara el espacio de "
+                        + "nombres (nsURI) de su metamodelo");
+            }
+            throw new RootFound(uri);
+        }
+    }
+
+    private static final class RootFound extends SAXException {
+        private final String nsUri;
+
+        RootFound(String nsUri) {
+            super(nsUri);
+            this.nsUri = nsUri;
         }
     }
 }

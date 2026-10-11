@@ -10,6 +10,8 @@ public interface AcceleoModuleRepository extends JpaRepository<AcceleoModule, Lo
 
     boolean existsByName(String name);
 
+    boolean existsByNameAndIdNot(String name, Long id);
+
     boolean existsByMetamodel(Metamodel metamodel);
 
     List<AcceleoModule> findAllByOrderByNameAsc();
