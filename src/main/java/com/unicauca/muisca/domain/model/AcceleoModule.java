@@ -1,6 +1,8 @@
 package com.unicauca.muisca.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -31,8 +33,8 @@ public class AcceleoModule {
     @JoinColumn(name = "metamodel_id", nullable = false)
     private Metamodel metamodel;
 
-    @Lob
-    @Column(name = "template_source", nullable = false, columnDefinition = "LONGTEXT")
+    @JdbcTypeCode(SqlTypes.LONG32VARCHAR)
+    @Column(name = "template_source", nullable = false)
     private String templateSource;
 
     @ManyToOne(optional = false)

@@ -1,6 +1,8 @@
 package com.unicauca.muisca.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -28,8 +30,8 @@ public class StoredModel {
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Lob
-    @Column(nullable = false, columnDefinition = "LONGBLOB")
+    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)
+    @Column(nullable = false)
     private byte[] content;
 
     @Column(name = "size_bytes", nullable = false)

@@ -1,6 +1,8 @@
 package com.unicauca.muisca.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -49,12 +51,12 @@ public class AtlModule {
     @Column(name = "target_alias", nullable = false)
     private String targetAlias;
 
-    @Lob
-    @Column(name = "source_code", nullable = false, columnDefinition = "LONGTEXT")
+    @JdbcTypeCode(SqlTypes.LONG32VARCHAR)
+    @Column(name = "source_code", nullable = false)
     private String sourceCode;
 
-    @Lob
-    @Column(name = "compiled_module", nullable = false, columnDefinition = "LONGBLOB")
+    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)
+    @Column(name = "compiled_module", nullable = false)
     private byte[] compiledModule;
 
     @ManyToOne(optional = false)

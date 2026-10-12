@@ -77,14 +77,16 @@ public class TransformationController {
     }
 
     /**
-     * El usuario sube su modelo (inputModel) o elige uno de su biblioteca (modelId) y obtiene el
-     * resultado. Responde 201 si la ejecución terminó bien y 422 si el motor falló; en ambos
-     * casos la ejecución queda en el historial.
+     * El usuario sube su modelo (inputModel) o elige uno de su biblioteca (modelId). Sin async
+     * espera el resultado: 201 si terminó bien y 422 si el motor falló (ambas quedan en el
+     * historial). Con async=true responde 202 con la ejecución RUNNING, que el cliente consulta en
+     * GET /api/executions/{id} hasta que termine.
      */
     @PostMapping(path = "/{id}/executions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ExecutionResponse> execute(@PathVariable Long id,
             @RequestParam(required = false) MultipartFile inputModel,
             @RequestParam(required = false) Long modelId,
+            @RequestParam(defaultValue = "false") boolean async,
             @CurrentUser UserEntity actor) {
         if ((inputModel == null) == (modelId == null)) {
             throw new IllegalArgumentException("Envíe el archivo del modelo (inputModel) o el id de un modelo "
@@ -92,6 +94,9 @@ public class TransformationController {
         }
         UploadedFile model = inputModel != null ? Files.upload(inputModel)
                 : storedModelService.asUploadedFile(modelId, actor);
+        if (async) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(executionService.start(id, model, actor));
+        }
         ExecutionResponse execution = executionService.execute(id, model, actor);
         HttpStatus status = execution.status() == ExecutionStatus.SUCCEEDED ? HttpStatus.CREATED
                 : HttpStatus.UNPROCESSABLE_ENTITY;

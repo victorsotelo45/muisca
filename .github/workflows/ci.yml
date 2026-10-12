@@ -17,8 +17,8 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
-      # MuiscawebApplicationTests levanta el contexto completo y necesita MySQL: se excluye aquí.
-      - name: Pruebas de los motores MDE
-        run: ./mvnw -B test -Dtest='!MuiscawebApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
+      # Motores MDE y flujo completo de la API (perfil test con base H2 en memoria).
+      - name: Pruebas
+        run: ./mvnw -B test
       - name: Construir la imagen Docker
         run: docker build -t muisca-api .

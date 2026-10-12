@@ -2,9 +2,11 @@ package com.unicauca.muisca.infrastructure.web;
 
 import com.unicauca.muisca.application.dto.ExecutionResponse;
 import com.unicauca.muisca.application.dto.GeneratedFile;
+import com.unicauca.muisca.application.dto.PageResponse;
 import com.unicauca.muisca.application.exception.ResourceNotFoundException;
 import com.unicauca.muisca.application.service.ExecutionService;
 import com.unicauca.muisca.domain.model.Execution;
+import com.unicauca.muisca.domain.model.ExecutionStatus;
 import com.unicauca.muisca.domain.model.UserEntity;
 import com.unicauca.muisca.domain.repository.ExecutionSummary;
 import com.unicauca.muisca.infrastructure.security.CurrentUser;
@@ -29,6 +31,16 @@ public class ExecutionController {
     @GetMapping
     public List<ExecutionSummary> list(@CurrentUser UserEntity actor) {
         return executionService.list(actor);
+    }
+
+    /** Historial paginado y filtrado en el servidor (page empieza en 0). */
+    @GetMapping("/search")
+    public PageResponse<ExecutionSummary> search(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) ExecutionStatus status,
+            @RequestParam(required = false) String q,
+            @CurrentUser UserEntity actor) {
+        return executionService.search(actor, status, q, page, size);
     }
 
     @GetMapping("/{id}")

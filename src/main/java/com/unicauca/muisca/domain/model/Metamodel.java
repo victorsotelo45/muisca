@@ -1,6 +1,8 @@
 package com.unicauca.muisca.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -27,12 +29,12 @@ public class Metamodel {
     @Column(name = "ecore_file_name", nullable = false)
     private String ecoreFileName;
 
-    @Lob
-    @Column(name = "ecore_data", nullable = false, columnDefinition = "LONGBLOB")
+    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)
+    @Column(name = "ecore_data", nullable = false)
     private byte[] ecoreData;
 
-    @Lob
-    @Column(name = "genmodel_data", columnDefinition = "LONGBLOB")
+    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)
+    @Column(name = "genmodel_data")
     private byte[] genmodelData;
 
     @ManyToOne(optional = false)

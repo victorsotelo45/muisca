@@ -1,5 +1,6 @@
 package com.unicauca.muisca.domain.repository;
 
+import com.unicauca.muisca.domain.model.ExecutionStage;
 import com.unicauca.muisca.domain.model.ExecutionStatus;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ public record ExecutionSummary(
         String transformationName,
         String executedBy,
         ExecutionStatus status,
+        ExecutionStage stage,
         String inputModelName,
         String errorMessage,
         long durationMs,
