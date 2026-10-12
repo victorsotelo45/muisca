@@ -1,6 +1,9 @@
 package com.unicauca.muisca.domain.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,15 +15,22 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @Column(unique = true, nullable = false)
     private String username;
+
+    // Null para cuentas provistas solo por un proveedor OAuth (Google):
+    // no tienen contraseña local, ver CustomUserDetailsService.
     private String password;
-    private String role;
-   
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     public UserEntity() {
     }
 
-    public UserEntity(String username, String password, String role) {
+    public UserEntity(String username, String password, Role role) {
         this.username = username;
         this.password = password;
         this.role = role;
@@ -50,11 +60,11 @@ public class UserEntity {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
