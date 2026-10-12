@@ -31,6 +31,26 @@ feature/mi-cambio ──PR──▶ lab ──(merge ⇒ despliegue automático 
 
 Recomendado: en GitHub > Settings > Branches proteja `main` y `lab` exigiendo PR y CI en verde.
 
+### Cómo llega cada merge a Render
+
+| Repositorio | Mecanismo | Tiempo hasta desplegar |
+| --- | --- | --- |
+| Backend (`victorsotelo45/muisca`) | La app de GitHub de Render recibe el push y despliega cuando pasa el CI | ~5 min (build Docker) |
+| Frontend (`cristianbelal/muiscaFrontend`) | El workflow `deploy-frontend.yml` del repo del backend revisa `lab` y `main` del frontend cada 10 minutos y despliega el commit nuevo si su CI pasó | ≤ 10–15 min |
+
+El frontend necesita ese workflow porque su repositorio pertenece a otra cuenta, que no tiene
+instalada la app de Render, y por eso Render no recibe sus pushes. El workflow usa el secreto
+`RENDER_API_KEY` del repo del backend; para desplegar de inmediato, ejecútelo a mano desde
+GitHub > Actions > *Desplegar frontend* > *Run workflow*.
+
+Para que el frontend despliegue al instante, como el backend, el dueño del repositorio
+(`cristianbelal`) debe instalar la app de Render en su cuenta (GitHub > Settings > Applications >
+Render > dar acceso a `muiscaFrontend`). Desde ese momento el workflow encontrará los commits ya
+desplegados y no hará nada; se puede desactivar.
+
+Si cambia la API key de Render, actualice el secreto `RENDER_API_KEY` en GitHub > Settings >
+Secrets and variables > Actions.
+
 ## ¿PostgreSQL o MySQL?
 
 El backend funciona con **los dos sin cambiar código**. El driver y el dialecto de Hibernate se
