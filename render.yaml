@@ -1,14 +1,15 @@
-# Blueprint de Render para MUISCA: dos entornos completos, gratuitos y con despliegue automático.
+# Infraestructura de MUISCA en Render: dos entornos completos, gratuitos y con despliegue automático.
 #
-#   rama lab  → Laboratorio:  muisca-unicauca-api-lab  +  muisca-unicauca-web-lab
-#   rama main → Producción:   muisca-unicauca-api      +  muisca-unicauca-web
+#   rama lab  -> Laboratorio:  muisca-unicauca-api-lab  +  muisca-unicauca-web-lab  (base muisca_lab)
+#   rama main -> Producción:   muisca-unicauca-api      +  muisca-unicauca-web      (base muisca_prod)
 #
-# Flujo: feature/* → PR a lab (se despliega Laboratorio) → PR lab → main (se despliega Producción).
+# Flujo: feature/* -> PR a lab (se despliega Laboratorio) -> PR lab -> main (se despliega Producción).
 # Cada servicio se redespliega solo cuando el CI de GitHub Actions de su repositorio pasa.
 #
-# Los valores marcados con `sync: false` son secretos: Render los pide al crear el Blueprint.
-# Base de datos: MySQL gratuito de Aiven (una instancia con dos bases: muisca_lab y muisca_prod).
-# Guía completa: docs/DESPLIEGUE.md
+# Los servicios se crearon con la API de Render (2026-10-12); este archivo documenta su
+# configuración y sirve para recrearlos como Blueprint. Base de datos: Render PostgreSQL Free
+# "muisca-db" (una instancia, dos bases). Los secretos (sync: false) no se versionan.
+# Guía completa y cambio a MySQL u otro PostgreSQL: docs/DESPLIEGUE.md
 
 services:
   # ------------------------------------------------------------------ Producción
@@ -24,7 +25,7 @@ services:
     autoDeployTrigger: checksPass
     envVars:
       - key: DB_URL
-        sync: false # jdbc:mysql://<host>:<puerto>/muisca_prod?sslMode=REQUIRED&createDatabaseIfNotExist=true
+        sync: false # jdbc:postgresql://<host-interno>:5432/muisca_prod
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
@@ -57,6 +58,8 @@ services:
     envVars:
       - key: API_URL
         value: https://muisca-unicauca-api.onrender.com
+      - key: NODE_VERSION
+        value: "22"
       - key: GOOGLE_CLIENT_ID
         sync: false
     routes:
@@ -84,7 +87,7 @@ services:
     autoDeployTrigger: checksPass
     envVars:
       - key: DB_URL
-        sync: false # jdbc:mysql://<host>:<puerto>/muisca_lab?sslMode=REQUIRED&createDatabaseIfNotExist=true
+        sync: false # jdbc:postgresql://<host-interno>:5432/muisca_lab
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
@@ -117,6 +120,8 @@ services:
     envVars:
       - key: API_URL
         value: https://muisca-unicauca-api-lab.onrender.com
+      - key: NODE_VERSION
+        value: "22"
       - key: ENVIRONMENT_NAME
         value: Laboratorio
       - key: GOOGLE_CLIENT_ID
