@@ -1,6 +1,7 @@
 package com.unicauca.muisca.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
@@ -45,27 +46,22 @@ public class Execution {
     @Column(name = "input_model_name", nullable = false)
     private String inputModelName;
 
-    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)
-    @Column(name = "input_model", nullable = false)
+    @Column(name = "input_model", nullable = false, length = Length.LONG32)
     private byte[] inputModel;
 
     @Column(name = "output_model_name")
     private String outputModelName;
 
-    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)
-    @Column(name = "output_model")
+    @Column(name = "output_model", length = Length.LONG32)
     private byte[] outputModel;
 
-    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)
-    @Column(name = "generated_code")
+    @Column(name = "generated_code", length = Length.LONG32)
     private byte[] generatedCode;
 
-    @JdbcTypeCode(SqlTypes.LONG32VARCHAR)
-    @Column(name = "generated_file_names")
+    @Column(name = "generated_file_names", length = Length.LONG32)
     private String generatedFileNames;
 
-    @JdbcTypeCode(SqlTypes.LONG32VARCHAR)
-    @Column(name = "error_message")
+    @Column(name = "error_message", length = Length.LONG32)
     private String errorMessage;
 
     @Column(name = "duration_ms", nullable = false)
