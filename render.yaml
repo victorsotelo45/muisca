@@ -4,11 +4,11 @@
 #   rama main -> Producción:   muisca-unicauca-api      +  muisca-unicauca-web      (base muisca_prod)
 #
 # Flujo: feature/* -> PR a lab (se despliega Laboratorio) -> PR lab -> main (se despliega Producción).
-# Cada servicio se redespliega solo cuando el CI de GitHub Actions de su repositorio pasa.
+# Backend: Render despliega cuando pasa su CI. Frontend: su propio CI despliega tras pasar las pruebas.
 #
 # Los servicios se crearon con la API de Render (2026-10-12); este archivo documenta su
-# configuración y sirve para recrearlos como Blueprint. Base de datos: Render PostgreSQL Free
-# "muisca-db" (una instancia, dos bases). Los secretos (sync: false) no se versionan.
+# configuración y sirve para recrearlos como Blueprint. Base de datos: Aiven for MySQL, plan
+# Free (servicio "muisca", bases muisca_lab y muisca_prod). Los secretos (sync: false) no se versionan.
 # Guía completa y cambio a MySQL u otro PostgreSQL: docs/DESPLIEGUE.md
 
 services:
@@ -25,7 +25,7 @@ services:
     autoDeployTrigger: checksPass
     envVars:
       - key: DB_URL
-        sync: false # jdbc:postgresql://<host-interno>:5432/muisca_prod
+        sync: false # jdbc:mysql://<host-aiven>:<puerto>/muisca_prod?sslMode=REQUIRED
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
@@ -50,11 +50,12 @@ services:
   - type: web
     name: muisca-unicauca-web
     runtime: static
-    repo: https://github.com/cristianbelal/muiscaFrontend
+    repo: https://github.com/victorsotelo45/muisca_frontend
     branch: main
     buildCommand: npm ci && npm run build && node scripts/write-runtime-config.mjs
     staticPublishPath: ./dist/zenodo-muisca/browser
-    autoDeployTrigger: checksPass
+    # El CI del repo del frontend despliega cada merge (job deploy); Render no dispara solo.
+    autoDeployTrigger: "off"
     envVars:
       - key: API_URL
         value: https://muisca-unicauca-api.onrender.com
@@ -87,7 +88,7 @@ services:
     autoDeployTrigger: checksPass
     envVars:
       - key: DB_URL
-        sync: false # jdbc:postgresql://<host-interno>:5432/muisca_lab
+        sync: false # jdbc:mysql://<host-aiven>:<puerto>/muisca_lab?sslMode=REQUIRED
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
@@ -112,11 +113,12 @@ services:
   - type: web
     name: muisca-unicauca-web-lab
     runtime: static
-    repo: https://github.com/cristianbelal/muiscaFrontend
+    repo: https://github.com/victorsotelo45/muisca_frontend
     branch: lab
     buildCommand: npm ci && npm run build && node scripts/write-runtime-config.mjs
     staticPublishPath: ./dist/zenodo-muisca/browser
-    autoDeployTrigger: checksPass
+    # El CI del repo del frontend despliega cada merge (job deploy); Render no dispara solo.
+    autoDeployTrigger: "off"
     envVars:
       - key: API_URL
         value: https://muisca-unicauca-api-lab.onrender.com
