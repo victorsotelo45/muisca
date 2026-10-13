@@ -7,10 +7,13 @@
 | Producción | `main` | <https://muisca-unicauca-web.onrender.com> | <https://muisca-unicauca-api.onrender.com> | `muisca_prod` |
 | Laboratorio | `lab` | <https://muisca-unicauca-web-lab.onrender.com> | <https://muisca-unicauca-api-lab.onrender.com> | `muisca_lab` |
 
-- **Hosting:** Render, plan gratuito. El frontend es un *Static Site* (CDN, no se duerme). El backend
-  es un *Web Service* Docker (512 MB, 0,1 CPU).
-- **Base de datos:** una instancia *Render PostgreSQL Free* (`muisca-db`, PostgreSQL 16) con dos
-  bases, una por entorno. Solo acepta conexiones internas desde los servicios de Render.
+| Pieza | Dónde |
+| --- | --- |
+| Código del backend | <https://github.com/victorsotelo45/muisca> |
+| Código del frontend | <https://github.com/victorsotelo45/muisca_frontend> |
+| Hosting | Render, plan gratuito: *Static Site* para el frontend (CDN, no se duerme) y *Web Service* Docker para el backend (512 MB, 0,1 CPU) |
+| Base de datos | Aiven for MySQL, plan **Free** (`free-1-1gb`, 1 GB): servicio `muisca` con las bases `muisca_lab` y `muisca_prod` |
+
 - **Laboratorio** muestra la insignia "LABORATORIO" en la barra superior.
 - Cada entorno tiene su propio `JWT_SECRET` y su propio administrador inicial (`admin`).
 - La configuración de los cuatro servicios está en [`render.yaml`](../render.yaml).
@@ -18,93 +21,67 @@
 ## Flujo de ramas: el merge despliega
 
 ```
-feature/mi-cambio ──PR──▶ lab ──(merge ⇒ despliegue automático en Laboratorio)
+feature/mi-cambio ──PR──▶ lab ──(merge ⇒ despliegue en Laboratorio)
                            │
-                           └──PR──▶ main ──(merge ⇒ despliegue automático en Producción)
+                           └──PR──▶ main ──(merge ⇒ despliegue en Producción)
 ```
 
 1. Cree `feature/...` desde `lab`, trabaje y abra un Pull Request hacia `lab`.
-2. GitHub Actions compila y prueba (backend: motores MDE + flujo completo de la API; frontend:
-   pruebas unitarias + build). Al hacer merge, Render despliega **Laboratorio**
-   (`autoDeployTrigger: checksPass`: solo despliega si el CI pasa).
-3. Valide en Laboratorio y abra un PR `lab → main`. Al hacer merge, Render despliega **Producción**.
+2. GitHub Actions compila y prueba. En el backend corre la suite completa (motores MDE + flujo de la
+   API) y construye la imagen Docker; en el frontend, las pruebas unitarias y el build.
+3. Al hacer merge en `lab` se despliega **Laboratorio**. Valide ahí y abra un PR `lab → main`; al
+   hacer merge se despliega **Producción**. Si el CI falla, no se despliega nada.
 
-Recomendado: en GitHub > Settings > Branches proteja `main` y `lab` exigiendo PR y CI en verde.
-
-### Cómo llega cada merge a Render
-
-| Repositorio | Mecanismo | Tiempo hasta desplegar |
+| Repositorio | Quién despliega | Tiempo |
 | --- | --- | --- |
-| Backend (`victorsotelo45/muisca`) | La app de GitHub de Render recibe el push y despliega cuando pasa el CI | ~5 min (build Docker) |
-| Frontend (`cristianbelal/muiscaFrontend`) | El workflow `deploy-frontend.yml` del repo del backend revisa `lab` y `main` del frontend cada 10 minutos y despliega el commit nuevo si su CI pasó | ≤ 10–15 min |
+| Backend | La app de GitHub de Render, cuando pasa el CI (`autoDeployTrigger: checksPass`) | ~5 min (build Docker) |
+| Frontend | El job `deploy` del CI del propio repo, después de pruebas y build (secreto `RENDER_API_KEY`) | ~2 min |
 
-El frontend necesita ese workflow porque su repositorio pertenece a otra cuenta, que no tiene
-instalada la app de Render, y por eso Render no recibe sus pushes. El workflow usa el secreto
-`RENDER_API_KEY` del repo del backend; para desplegar de inmediato, ejecútelo a mano desde
-GitHub > Actions > *Desplegar frontend* > *Run workflow*.
+Recomendado: en GitHub > Settings > Branches proteja `main` y `lab` en ambos repos exigiendo PR y
+CI en verde.
 
-Para que el frontend despliegue al instante, como el backend, el dueño del repositorio
-(`cristianbelal`) debe instalar la app de Render en su cuenta (GitHub > Settings > Applications >
-Render > dar acceso a `muiscaFrontend`). Desde ese momento el workflow encontrará los commits ya
-desplegados y no hará nada; se puede desactivar.
+## Base de datos: MySQL en Aiven
 
-Si cambia la API key de Render, actualice el secreto `RENDER_API_KEY` en GitHub > Settings >
-Secrets and variables > Actions.
+- **Conexión:** `jdbc:mysql://muisca-muisca.e.aivencloud.com:22783/<base>?sslMode=REQUIRED`, usuario
+  `avnadmin`. La contraseña se ve en la consola de Aiven (servicio `muisca` > *Overview*).
+- **Si cambia la contraseña** en Aiven, actualice `DB_PASSWORD` en los dos backends de Render.
+- **Tablas:** se crean solas en el primer arranque, junto con el administrador y el catálogo inicial.
+  En una base vacía el catálogo tarda un par de minutos en aparecer tras el primer arranque, porque
+  compila los módulos ATL y Acceleo.
+- **Restricción:** Aiven exige clave primaria en todas las tablas (`sql_require_primary_key`); todas
+  las entidades de MUISCA la tienen. Téngalo en cuenta si agrega tablas nuevas.
+- **Plan gratuito:** 1 GB compartido por las dos bases. Las ejecuciones guardan modelos y código;
+  elimine las antiguas desde el historial si se acerca al límite. Revise en la página de precios de
+  Aiven las condiciones vigentes del plan Free (por ejemplo, qué pasa con un servicio inactivo).
 
-## ¿PostgreSQL o MySQL?
-
-El backend funciona con **los dos sin cambiar código**. El driver y el dialecto de Hibernate se
-deducen de `DB_URL`, y los tipos de columna son portables: `bytea`/`text` en PostgreSQL y
-`longblob`/`longtext` en MySQL.
-
-| | PostgreSQL | MySQL |
-| --- | --- | --- |
-| Uso actual | Despliegue en Render (lab y prod) | Desarrollo local (tu `.env`) |
-| URL | `jdbc:postgresql://HOST:5432/BASE` | `jdbc:mysql://HOST:3306/BASE` |
-| Gratis en la nube | Render (vence a los 30 días), Neon (sin vencimiento), Supabase | Aiven Free, TiDB Serverless |
-| Ventaja | Se crea desde Render con la misma API que los servicios | Igual a tu entorno local |
-
-**Recomendación:** usar PostgreSQL en la nube y MySQL en local; el CI prueba el código con una
-base en memoria. **La base gratuita de Render vence el 2026-11-11** (Render da 14 días más para
-pasarla a pago, ~USD 6/mes). Antes de esa fecha:
-
-- **Sin costo:** cree un proyecto en [Neon](https://neon.tech) (PostgreSQL gratis sin vencimiento,
-  con *branches* para lab y prod) y cambie `DB_URL`, `DB_USERNAME` y `DB_PASSWORD` de los dos
-  backends en Render (agregue `?sslmode=require` a la URL).
-- **O con MySQL:** cree un MySQL en Aiven y use
-  `jdbc:mysql://HOST:PORT/muisca_prod?sslMode=REQUIRED&createDatabaseIfNotExist=true`.
-
-Las tablas se crean solas en el primer arranque (`ddl-auto=update`), junto con el administrador y
-el catálogo inicial. Los datos del entorno anterior no se migran automáticamente.
+El backend también funciona con PostgreSQL sin cambiar código: el driver y el dialecto se deducen
+de `DB_URL` (`jdbc:postgresql://...`).
 
 ## Primer ingreso
 
-Usuario `admin`. Las contraseñas iniciales de cada entorno se entregaron por fuera del repositorio
-(nunca se versionan). Cámbielas en **Mi cuenta → Cambiar contraseña** tras el primer ingreso; la
-variable `ADMIN_PASSWORD` solo se usa si no existe ningún administrador.
+Usuario `admin`; las contraseñas iniciales de cada entorno se entregaron por fuera del repositorio.
+Cámbielas en **Mi cuenta → Cambiar contraseña**. La variable `ADMIN_PASSWORD` solo se usa si no
+existe ningún administrador.
 
 ## Google Sign-In
 
 En Google Cloud Console → Credenciales → su cliente OAuth → *Orígenes de JavaScript autorizados*,
 agregue `https://muisca-unicauca-web.onrender.com` y `https://muisca-unicauca-web-lab.onrender.com`.
-Sin esto, el botón de Google falla en la nube; el acceso con usuario y contraseña funciona igual.
 
-## Limitaciones del plan gratuito
+## Limitaciones del plan gratuito de Render
 
 - **El backend se duerme tras 15 minutos sin tráfico.** La primera petición lo despierta y puede
-  tardar 1–3 minutos: Render retiene la petición mientras tanto y la pantalla de acceso avisa que
-  el servidor se está activando.
+  tardar 1–3 minutos; la aplicación avisa que el servidor se está activando.
 - **Horas de instancia:** Render da 750 horas gratis al mes por workspace, compartidas por los dos
   backends; como se duermen cuando no se usan, alcanzan para un prototipo.
-- **Base de datos:** 1 GB, compartido por las dos bases. Las ejecuciones guardan modelos y código;
-  elimine las antiguas desde el historial si se acerca al límite.
-- **Una ejecución a la vez:** cada backend procesa las transformaciones de una en una para no
-  exceder 512 MB; las demás esperan en cola y el usuario ve el avance.
+- **Una ejecución a la vez** por backend, para no exceder 512 MB; las demás esperan en cola.
 
 ## Operación
 
-- **Variables de entorno:** Render → servicio → *Environment*. Al cambiarlas, el servicio se
-  redespliega.
+- **Variables de entorno:** Render → servicio → *Environment* (al cambiarlas, use *Manual Deploy*).
 - **Logs:** Render → servicio → *Logs*.
-- **Despliegue manual:** Render → servicio → *Manual Deploy* (por ejemplo, tras cambiar `API_URL`).
 - **Salud del backend:** `https://<api>/health` debe responder `{"status":"UP"}`.
+- **API key de Render:** si la cambia, actualice el secreto `RENDER_API_KEY` de `muisca_frontend`
+  (GitHub > Settings > Secrets and variables > Actions).
+- **Base PostgreSQL anterior:** el servicio `muisca-db` de Render ya no se usa; vence el 2026-11-11 y
+  se puede eliminar desde Render sin afectar la aplicación.
